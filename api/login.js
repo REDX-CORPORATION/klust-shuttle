@@ -53,7 +53,7 @@ module.exports = async (req, res) => {
     const initRes = await fetchWithTimeout(`${KLUST_ORIGIN}/login`, { headers: { 'User-Agent': UA } });
     mergeCookies(jar, initRes.headers);
   } catch (e) {
-    res.status(502).json({ ok: false, error: `Could not reach KLUST LMS (${e.name || 'network error'}). Try again.` });
+    res.status(502).json({ ok: false, error: `Could not reach KLUST LMS (${describeError(e)}). Try again.` });
     return;
   }
 
@@ -72,7 +72,7 @@ module.exports = async (req, res) => {
       body: form.toString(),
     });
   } catch (e) {
-    res.status(502).json({ ok: false, error: `Could not reach KLUST LMS (${e.name || 'network error'}). Try again.` });
+    res.status(502).json({ ok: false, error: `Could not reach KLUST LMS (${describeError(e)}). Try again.` });
     return;
   }
   mergeCookies(jar, loginRes.headers);
@@ -136,6 +136,22 @@ module.exports = async (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
   res.status(200).json({ ok: true, name, studentId, photo, timetable });
 };
+
+// Node's fetch (undici) wraps every network-level failure as a generic
+// "TypeError: fetch failed" — the actual reason (DNS failure, connection
+// refused, TLS/certificate problem, timeout, ...) lives in error.cause.
+// This pulls that out so the real cause shows up instead of just "TypeError".
+function describeError(e) {
+  const cause = e && e.cause;
+  const parts = [];
+  if (e && e.name === 'AbortError') return 'timed out after 15s';
+  if (cause) {
+    if (cause.code) parts.push(cause.code);
+    if (cause.message && cause.message !== cause.code) parts.push(cause.message);
+  }
+  if (!parts.length && e && e.message) parts.push(e.message);
+  return parts.filter(Boolean).join(': ') || (e && e.name) || 'unknown network error';
+}
 
 // ---------------- fetch with a hard timeout (avoids hanging the function) ----------------
 async function fetchWithTimeout(url, opts = {}, ms = 15000) {
