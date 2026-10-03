@@ -1,5 +1,8 @@
 {
   "name": "klust-shuttle",
   "private": true,
-  "engines": { "node": "24.x" }
+  "engines": { "node": "24.x" },
+  "dependencies": {
+    "undici": "^6.19.8"
+  }
 }

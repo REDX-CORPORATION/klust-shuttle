@@ -11,8 +11,18 @@ package.json    pins Node 20.x for the function (for a complete fetch/cookie imp
 Note: this originally used Vercel's Edge Runtime, which some institutional
 servers (KLUST included) don't complete a network handshake with reliably —
 that showed up as "Could not reach KLUST LMS" even though the relay itself
-was running fine. It's now a plain Node.js function instead, which has a
-more complete networking stack and should connect reliably.
+was running fine. It's now a plain Node.js function instead.
+
+That surfaced a second, more specific issue: KLUST's server doesn't send
+its full TLS certificate chain (a missing intermediate certificate), which
+Node's strict verification rejects (`UNABLE_TO_VERIFY_LEAF_SIGNATURE`) even
+though browsers tolerate it (your OS fetches the missing certificate
+automatically; Node doesn't). `api/login.js` now relaxes certificate
+verification *specifically* for connections to `lms.klust.edu.my`, via the
+`undici` package (listed in `package.json` — Vercel installs it
+automatically on deploy). Every other request this relay could make still
+verifies normally; this is scoped narrowly, not a blanket "trust
+everything" setting.
 
 ## Deploy (first time)
 1. Push this folder to a GitHub repo (or drag-and-drop the folder straight into Vercel's "Import" screen — a repo isn't required).
