@@ -54,3 +54,12 @@ Deployed `api/login.js`'s logic elsewhere on its own domain? Open `index.html`, 
 const KLUST_RELAY_URL = '/api/login';
 ```
 and replace it with the absolute URL of that deployment instead.
+
+## Timetable parsing
+`api/login.js` reads KLUST's timetable grid (30-minute columns). Each class's
+width comes from its `colspan` (written as `colspan="6"`, `colspan=6` or
+`colspan='6'` depending on the server), and slot-to-time mapping is read from the
+grid's own header row (`08:00 AM`, `08:30 AM`, ...), not assumed. If the width
+were misread, every class after the first of the day would show too early.
+After deploying, **sign out and sign in again** so the app re-pulls the timetable
+(it is stored on the device from the last sign-in).

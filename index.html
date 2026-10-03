@@ -1081,9 +1081,16 @@ class ShuttleMap {
     });
   }
   paint() {
-    $$('.rt', this.map.vp).forEach(g => g.classList.toggle('gone', !!this.focus && g.dataset.r !== this.focus));
+    // Route of the selected vehicle (if any): every other route and its stops fade out, like idle vehicles do.
+    const sv = this.selV && vehicleById(this.selV), vr = sv && routeById(sv.route), vRid = vr ? vr.id : null;
+    $$('.rt', this.map.vp).forEach(g => {
+      g.classList.toggle('gone', !!this.focus && g.dataset.r !== this.focus);
+      g.classList.toggle('dim', !!vRid && g.dataset.r !== vRid);
+      if (vRid && g.dataset.r === vRid && g.parentNode.lastElementChild !== g) g.parentNode.appendChild(g); // draw the active route on top
+    });
     const on = this.focus ? new Set((routeById(this.focus) || { stops: [] }).stops) : null;
-    this.sm.forEach((m, sid) => { m.el.classList.toggle('sel', sid === this.selS); m.el.classList.toggle('gone', !!on && !on.has(sid)); });
+    const von = vr ? new Set(vr.stops) : null;
+    this.sm.forEach((m, sid) => { m.el.classList.toggle('sel', sid === this.selS); m.el.classList.toggle('gone', !!on && !on.has(sid)); m.el.classList.toggle('dim', !!von && !von.has(sid)); });
   }
   followCam(p) {
     const pd = this.o.padding ? this.o.padding() : { left: 0, right: 0, top: 0, bottom: 0 }, W = 256 * 2 ** this.map.z, [x, y] = merc(p.lat, p.lng);
@@ -1122,7 +1129,7 @@ class ShuttleMap {
   }
   setFocus(rid) { this.focus = rid; this.paint(); this.map.user = false; this.fit(true); }
   setStop(sid, pan) { this.selS = sid; this.paint(); if (pan) { const s = STOPS[sid], [x, y] = merc(s.lat, s.lng); this.map.user = true; this.map.flyTo(x, y, Math.max(this.map.z, 15)); } }
-  setVehicle(vid) { this.selV = vid; this.followV = vid; }
+  setVehicle(vid) { this.selV = vid; this.followV = vid; this.paint(); }
   panToVehicle(vid) { const v = vehicleById(vid), s = v && vState(v); if (!s || !s.visible) return; const p = vPos(s), [x, y] = merc(p.lat, p.lng), pd = this.o.padding ? this.o.padding() : { left: 0, right: 0, top: 0, bottom: 0 }; const W = 256 * 2 ** Math.max(this.map.z, 14); this.map.user = true; this.map.flyTo(x - ((pd.left || 0) - (pd.right || 0)) / 2 / W, y - ((pd.top || 0) - (pd.bottom || 0)) / 2 / W, Math.max(this.map.z, 14)); }
   hit(k) { const [t, id] = k.split(':'); if (t === 'v') { this.setVehicle(id); this.o.onVehicle && this.o.onVehicle(id); this.panToVehicle(id); } else if (this.o.onStop) this.o.onStop(id); }
   destroy() { cancelAnimationFrame(this.raf); this.offS && this.offS(); this.offG && this.offG(); window.removeEventListener('klust-theme', this.onTheme); this.map.destroy(); }
@@ -1420,7 +1427,7 @@ function suggestCard() {
        <button class="btn primary sm block" style="margin-top:10px" data-act="bookroute" data-r="${choice.o.r.id}">${icon('book')}Reserve this trip</button>`
     : `<p class="small muted" style="margin-top:8px">No shuttle gets you there in time right now &mdash; check Routes below or leave earlier.</p>`;
   return `<section class="card" style="margin:14px 0"><h3 class="sec" style="margin:0 0 2px">${icon('cal')}Suggested for you</h3>
-    <p class="small muted" style="margin:2px 0 0">${esc(cl.code)} ${esc(cl.name)} &middot; ${when} &middot; ${esc(cl.location || 'Location TBC')}</p>
+    <p class="small muted" style="margin:2px 0 0">${esc(cl.code)} ${esc(cl.name)} &middot; ${when}${cl.end ? ' to ' + fmtHM(cl.end) : ''} &middot; ${esc(cl.location || 'Location TBC')}</p>
     ${body}</section>`;
 }
 /* ---------- Home: live map (UC-03, UC-04) ---------- */
@@ -1744,7 +1751,7 @@ function timetableDialog() {
   const tt = Student.timetable();
   const byDay = DOWLABEL.map((lbl, dow) => ({ lbl, rows: tt.filter(c => c.dow === dow).sort((a, b) => a.start.localeCompare(b.start)) })).filter(d => d.rows.length);
   const html = byDay.length
-    ? byDay.map(d => `<h4 class="grp">${d.lbl}</h4><div class="list card-list" style="margin-bottom:12px">${d.rows.map(c => `<div class="lrow static"><span class="lrow-ico">${icon('cal')}</span><span class="grow"><b>${esc(c.code)} ${esc(c.name)}</b><small>${fmtHM(c.start)}, ${esc(c.location || 'Location TBC')}</small></span></div>`).join('')}</div>`).join('')
+    ? byDay.map(d => `<h4 class="grp">${d.lbl}</h4><div class="list card-list" style="margin-bottom:12px">${d.rows.map(c => `<div class="lrow static"><span class="lrow-ico">${icon('cal')}</span><span class="grow"><b>${esc(c.code)} ${esc(c.name)}</b><small>${fmtHM(c.start)}${c.end ? ' to ' + fmtHM(c.end) : ''}, ${esc(c.location || 'Location TBC')}</small></span></div>`).join('')}</div>`).join('')
     : `<p class="muted">No classes found.</p>`;
   openDialog({ title: 'My timetable', wide: true, html: `<p class="small muted" style="margin:-6px 0 14px">Pulled from KLUST LMS at sign-in.</p>${html}` });
 }

@@ -189,35 +189,70 @@ async function fetchWithTimeout(url, opts = {}, ms = 15000) {
 }
 
 // ---------------- Timetable parsing ----------------
-// Matches KLUST's grid: header row of 30-min slots from 08:00, then one row
-// per day with <td colspan=N class="table-yellow">CODE<br>NAME<br>LECTURER<br><br> Group G<br> Class Type : T<br>Location:L</td>
+// KLUST's grid: a header row of time labels ("08:00 AM", "08:30 AM", ... one per
+// 30-min slot), then one row per day. Each day row is: a day-name cell, then a
+// run of cells where an empty cell = one free slot and a class cell
+// (<td colspan=N ...>CODE<br>NAME<br>LECTURER<br><br> Group G<br> Class Type : T<br>Location:L</td>)
+// = N slots.
+//
+// Two things matter for getting later classes right:
+//  1. The width of each class must be read reliably. Servers write the attribute
+//     as colspan="6", colspan='6' or colspan=6 — a strict colspan="6" match
+//     silently falls back to width 1, which leaves the slot counter short and
+//     makes every class after the first one of the day appear too early.
+//  2. Slot -> clock time is taken from the header row's own labels instead of
+//     assuming "08:00 + 30 min x slot".
+const COLSPAN_RE = /colspan\s*=\s*(?:"\s*(\d+)\s*"|'\s*(\d+)\s*'|(\d+))/i;
+function getSpan(attrs) {
+  const m = attrs.match(COLSPAN_RE);
+  const n = m ? parseInt(m[1] || m[2] || m[3], 10) : 1;
+  return n > 0 ? n : 1;
+}
+// "08:30 AM" / "1:00 pm" / "13:00" -> minutes since midnight (or null)
+function parseClock(text) {
+  const m = String(text).replace(/\u00a0/g, ' ').trim().match(/^(\d{1,2})\s*[:.]\s*(\d{2})\s*([AaPp])?\.?\s*[Mm]?\.?$/);
+  if (!m) return null;
+  let h = parseInt(m[1], 10); const min = parseInt(m[2], 10);
+  if (m[3]) { const pm = m[3].toLowerCase() === 'p'; h = (h % 12) + (pm ? 12 : 0); }
+  return h * 60 + min;
+}
+// Split a chunk of HTML into [{attrs, html}] cells. Tolerates missing </td> and mixed case.
+function splitCells(rowHtml) {
+  return rowHtml.split(/<t[dh]\b/i).slice(1).map(chunk => {
+    const gt = chunk.indexOf('>');
+    return { attrs: gt < 0 ? chunk : chunk.slice(0, gt), html: (gt < 0 ? '' : chunk.slice(gt + 1)).split(/<\/t[dh]\s*>/i)[0] };
+  });
+}
 function parseTimetable(html) {
   const tableMatch = html.match(/<table[^>]*class="[^"]*timetable[^"]*"[\s\S]*?<\/table>/i) || html.match(/<table[^>]*>[\s\S]*?<\/table>/i);
   if (!tableMatch) return [];
-  const table = tableMatch[0];
-  const rowRe = /<tr[^>]*>([\s\S]*?)<\/tr>/gi;
+  const rows = tableMatch[0].split(/<tr\b[^>]*>/i).slice(1).map(splitCells).filter(r => r.length);
+
+  // Slot start times from the header row (first row with >= 2 parseable time labels).
+  let slotStarts = [];
+  for (const cells of rows) {
+    const times = cells.slice(1).map(c => parseClock(stripTags(decodeEntities(c.html))));
+    if (times.filter(t => t !== null).length >= 2) { slotStarts = times; break; }
+  }
+  // Fill any unreadable label and, if there is no header at all, fall back to 08:00 + 30-min steps.
+  const known = slotStarts.filter(t => t !== null);
+  const step = known.length >= 2 ? (known[1] - known[0]) || 30 : 30;
+  const base = known.length ? known[0] - slotStarts.indexOf(known[0]) * step : 8 * 60;
+  const slotMin = i => (i < slotStarts.length && slotStarts[i] !== null) ? slotStarts[i] : base + i * step;
+
   const classes = [];
-  let rowM;
-  while ((rowM = rowRe.exec(table))) {
-    const rowHtml = rowM[1];
-    const tdRe = /<td([^>]*)>([\s\S]*?)<\/td>/gi;
-    const cells = [];
-    let tdM;
-    while ((tdM = tdRe.exec(rowHtml))) cells.push({ attrs: tdM[1], html: tdM[2] });
-    if (!cells.length) continue;
-    const dayText = stripTags(cells[0].html).trim().toUpperCase();
+  for (const cells of rows) {
+    const dayText = stripTags(decodeEntities(cells[0].html)).replace(/\u00a0/g, ' ').trim().toUpperCase();
     const dow = DAY_NAMES.indexOf(dayText);
     if (dow < 0) continue; // header row or anything unexpected
-    let slot = 0; // each slot = 30 min, slot 0 = 08:00
+    let slot = 0;
     for (let i = 1; i < cells.length; i++) {
       const c = cells[i];
-      const spanM = c.attrs.match(/colspan="(\d+)"/);
-      const span = spanM ? parseInt(spanM[1], 10) || 1 : 1;
+      const span = getSpan(c.attrs);
       const cellText = decodeEntities(stripTags(c.html)).replace(/\u00a0/g, ' ').trim();
-      const busy = /table-yellow/.test(c.attrs) && cellText.length > 0;
-      if (busy) {
+      if (cellText.length > 0) { // a free slot is empty / &nbsp;; anything with text is a class
         const parsed = parseCell(c.html);
-        const startMin = 8 * 60 + slot * 30, endMin = startMin + span * 30;
+        const startMin = slotMin(slot), endMin = slotMin(slot + span);
         classes.push({ dow, day: DAY_NAMES[dow][0] + DAY_NAMES[dow].slice(1).toLowerCase(), start: minToHHMM(startMin), end: minToHHMM(endMin), ...parsed });
       }
       slot += span;
@@ -243,7 +278,7 @@ function parseCell(cellHtml) {
 }
 function stripTags(s) { return s.replace(/<[^>]+>/g, ''); }
 function minToHHMM(m) { const h = Math.floor(m / 60) % 24, mm = m % 60; return String(h).padStart(2, '0') + ':' + String(mm).padStart(2, '0'); }
-function decodeEntities(s) { return s.replace(/&amp;/g, '&').replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&#39;/g, "'").replace(/&quot;/g, '"'); }
+function decodeEntities(s) { return s.replace(/&#(\d+);/g, (_, n) => String.fromCharCode(+n)).replace(/&amp;/g, '&').replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&#39;/g, "'").replace(/&quot;/g, '"'); }
 
 // ---------------- Cookies / misc ----------------
 function mergeCookies(jar, headers) {
