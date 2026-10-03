@@ -1,0 +1,5 @@
+{
+  "name": "klust-shuttle",
+  "private": true,
+  "engines": { "node": "20.x" }
+}
