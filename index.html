@@ -466,6 +466,7 @@ button.lrow:hover{background:linear-gradient(90deg,transparent,var(--surface-2) 
 .login-card .seg{margin-bottom:16px}.login-card .btn.lg{margin-top:4px}
 .login-card.swap>*{animation:enter .4s var(--ease) backwards}.login-card.swap>*:nth-child(2){animation-delay:.04s}.login-card.swap>*:nth-child(3){animation-delay:.08s}.login-card.swap>*:nth-child(4){animation-delay:.12s}.login-card.swap>*:nth-child(5){animation-delay:.16s}
 .login-card.shake{animation:shake .45s}
+.credits{margin-top:18px;padding-top:14px;border-top:1px solid var(--line);text-align:center}.credits h4{font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}.credits ul{list-style:none;margin:0;padding:0;display:grid;gap:4px}.credits li{font-size:12.5px;color:var(--ink-2)}.credits li small{color:var(--muted);font-variant-numeric:tabular-nums;margin-left:4px}
 .login-mobile-brand{display:flex;align-items:center;gap:10px;margin-bottom:18px;font-size:16px;font-weight:800}
 .login-note{display:flex;gap:10px;align-items:flex-start;margin-top:18px;padding-top:16px;border-top:1px solid var(--line-2);font-size:12.5px;color:var(--muted)}.login-note .ico{width:16px;height:16px;margin-top:1px}
 .vpick{display:flex;flex-direction:column;gap:6px;margin-top:14px;max-height:56vh;overflow-y:auto;padding-right:2px}
@@ -641,11 +642,18 @@ const ICONS = {
 const icon = (n, cls = '') => `<svg class="ico ${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n] || ''}</svg>`;
 
 /* =================== Network: stops, routes, fleet =================== */
+const CREDITS = [
+  { name: 'JITU MOHTASIM BILLAH', id: '253926445' },
+  { name: 'KHAN SAYEM', id: '253926224' },
+  { name: 'Tanvir Islam', id: '251925401' },
+  { name: 'PAUL NIRJON', id: '253926372' }
+];
+const creditsHtml = () => `<div class="credits"><h4>Built by Team INFINIX</h4><ul>${CREDITS.map(c => `<li>${esc(c.name)}<small>${esc(c.id)}</small></li>`).join('')}</ul></div>`;
 // Coordinates supplied by the KLUST shuttle team (decimal degrees). Edit lat/lng here to move a stop.
 // Unipark Condominium and Unipark Student Residences are the same stop. DeCentrum Residences sits directly above DeCentrum Mall, so they share a point.
 const STOPS = {
   B9: { name: 'KLUST Block 9', short: 'Block 9', lat: 2.9739585179161883, lng: 101.73891143292158, hub: true, campus: true },
-  AGRI: { name: 'KLUST Faculty of Agriculture', short: 'Agriculture', lat: 2.977004000544807, lng: 101.73837059483141, campus: true },
+  AGRI: { name: 'KLUST Faculty of Architecture', short: 'Architecture', lat: 2.977004000544807, lng: 101.73837059483141, campus: true },
   UNIPARK: { name: 'Unipark Condominium', short: 'Unipark', lat: 2.97850, lng: 101.73600, campus: true, note: 'Student residences' },
   DCMALL: { name: 'DeCentrum Mall', short: 'DeCentrum Mall', lat: 2.979819874394559, lng: 101.73884922047499, campus: true },
   DCRES: { name: 'DeCentrum Residences', short: 'DeCentrum Res.', lat: 2.979819874394559, lng: 101.73884922047499, campus: true, lbl: 'l' },
@@ -1318,7 +1326,7 @@ const Login = {
         <p id="lerr" class="errtxt" role="alert" hidden></p>
         <button class="btn primary block lg" id="lbtn" type="submit"><span class="btn-label">Sign in</span></button>
       </form>
-      <p class="login-note">${icon('cash')}<span>No smartphone? Show your student ID to the driver and pay cash on board.</span></p>`;
+      <p class="login-note">${icon('cash')}<span>No smartphone? Show your student ID to the driver and pay cash on board.</span></p>${creditsHtml()}`;
     c.onclick = e => {
       const r = e.target.closest('[data-role]'); if (r) { this.role = r.dataset.role; $$('[data-role]', c).forEach(b => { b.setAttribute('aria-pressed', b === r); b.setAttribute('aria-checked', b === r); }); }
       const eye = e.target.closest('[data-act="eye"]'); if (eye) { const p = $('#lp'); const show = p.type === 'password'; p.type = show ? 'text' : 'password'; eye.innerHTML = icon(show ? 'eyeoff' : 'eye'); eye.setAttribute('aria-label', show ? 'Hide password' : 'Show password'); }
@@ -1730,7 +1738,8 @@ SCREENS.account = el => {
       <div class="list card-list">${rows}</div>
       ${extra}
       <button class="btn ghost block" data-act="signout">${icon('logout')}Sign out</button>
-      <button class="linkbtn subtle center" data-act="reset">Reset demo data</button></div>`;
+      <button class="linkbtn subtle center" data-act="reset">Reset demo data</button>
+      ${creditsHtml()}</div>`;
   };
   paint();
   el.onclick = e => { const t = e.target.closest('button'); if (!t) return; if (t.dataset.th) { Theme.set(t.dataset.th); paint(); } if (t.dataset.act === 'stop') Student.pickStop(() => paint()); if (t.dataset.act === 'timetable') timetableDialog(); if (t.dataset.act === 'vehicle') pickVehicleDialog(() => paint()); if (t.dataset.act === 'signout') App.signOut(); if (t.dataset.act === 'reset') resetDemo(); };
