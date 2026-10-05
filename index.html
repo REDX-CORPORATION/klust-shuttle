@@ -648,7 +648,7 @@ const CREDITS = [
   { name: 'Tanvir Islam', id: '251925401' },
   { name: 'PAUL NIRJON', id: '253926372' }
 ];
-const creditsHtml = () => `<div class="credits"><h4>Developed by Team INFINIX</h4><ul>${CREDITS.map(c => `<li>${esc(c.name)}<small>${esc(c.id)}</small></li>`).join('')}</ul></div>`;
+const creditsHtml = () => `<div class="credits"><h4>Built by Team INFINIX</h4><ul>${CREDITS.map(c => `<li>${esc(c.name)}<small>${esc(c.id)}</small></li>`).join('')}</ul></div>`;
 // Coordinates supplied by the KLUST shuttle team (decimal degrees). Edit lat/lng here to move a stop.
 // Unipark Condominium and Unipark Student Residences are the same stop. DeCentrum Residences sits directly above DeCentrum Mall, so they share a point.
 const STOPS = {
@@ -753,6 +753,13 @@ window.addEventListener('storage', e => {
   if (e.key === Geo.KEY) { Geo.load(); Geo.emit(); }
 });
 const routeById = id => Store.d.routes.find(r => r.id === id);
+/* Minutes until a vehicle is back at the Block 9 hub (layover time excluded). */
+function rideInfo(v, t = Date.now()) {
+  const s = vState(v, t); if (!s.visible) return null;
+  const hold = s.holdLeft / MIN;
+  if (s.w.mode === 'layover') return { layover: true, left: s.w.left + hold, min: s.w.left + hold + s.S.R, s };
+  return { layover: false, min: s.S.R - s.p + hold, s };
+}
 const vehicleById = id => Store.d.vehicles.find(v => v.id === id);
 const driverById = id => Store.d.drivers.find(x => x.id === id);
 const liveRoutes = () => Store.d.routes.filter(r => !r.archived);
@@ -1139,6 +1146,7 @@ class ShuttleMap {
   setStop(sid, pan) { this.selS = sid; this.paint(); if (pan) { const s = STOPS[sid], [x, y] = merc(s.lat, s.lng); this.map.user = true; this.map.flyTo(x, y, Math.max(this.map.z, 15)); } }
   setVehicle(vid) { this.selV = vid; this.followV = vid; this.paint(); }
   panToVehicle(vid) { const v = vehicleById(vid), s = v && vState(v); if (!s || !s.visible) return; const p = vPos(s), [x, y] = merc(p.lat, p.lng), pd = this.o.padding ? this.o.padding() : { left: 0, right: 0, top: 0, bottom: 0 }; const W = 256 * 2 ** Math.max(this.map.z, 14); this.map.user = true; this.map.flyTo(x - ((pd.left || 0) - (pd.right || 0)) / 2 / W, y - ((pd.top || 0) - (pd.bottom || 0)) / 2 / W, Math.max(this.map.z, 14)); }
+  rideCam(vid, instant) { const v = vehicleById(vid), s = v && vState(v); if (!s || !s.visible) return; this.setVehicle(vid); const p = vPos(s), [x, y] = merc(p.lat, p.lng), pd = this.o.padding ? this.o.padding() : { left: 0, right: 0, top: 0, bottom: 0 }, z = 16, W = 256 * 2 ** z; this.map.user = true; this.map.flyTo(x - ((pd.left || 0) - (pd.right || 0)) / 2 / W, y - ((pd.top || 0) - (pd.bottom || 0)) / 2 / W, z, instant ? 0 : 900); }
   hit(k) { const [t, id] = k.split(':'); if (t === 'v') { this.setVehicle(id); this.o.onVehicle && this.o.onVehicle(id); this.panToVehicle(id); } else if (this.o.onStop) this.o.onStop(id); }
   destroy() { cancelAnimationFrame(this.raf); this.offS && this.offS(); this.offG && this.offG(); window.removeEventListener('klust-theme', this.onTheme); this.map.destroy(); }
 }
@@ -1198,7 +1206,7 @@ const ROLES = {
 const SCREENS = {};
 
 const App = {
-  s: null, tab: null, draft: {}, ui: {}, scr: null, seen: new Set(), alarmSeen: new Set(),
+  s: null, tab: null, draft: {}, ui: {}, scr: null, seen: new Set(), alarmSeen: new Set(), boardedSeen: new Set(), rideDone: new Set(),
   init() {
     Theme.apply(); Store.load(); Geo.load();
     try { this.s = JSON.parse(sessionStorage.getItem(SKEY) || 'null'); } catch (e) { this.s = null; }
@@ -1265,7 +1273,7 @@ const App = {
   busy() { const a = document.activeElement; return !!$('.scrim') || (a && /INPUT|TEXTAREA|SELECT/.test(a.tagName) && !!a.closest('#screen')); },
   onStore(src) {
     if (!this.s) return;
-    if (src === 'remote') { if (!this.valid(this.s)) { this.signOut(); return; } this.announce(); if (this.scr && this.scr.onStore) this.scr.onStore(); else if (!this.busy()) this.refresh(); }
+    if (src === 'remote') { if (!this.valid(this.s)) { this.signOut(); return; } this.announce(); if (this.rideCheck()) { this.badges(); return; } if (this.scr && this.scr.onStore) this.scr.onStore(); else if (!this.busy()) this.refresh(); }
     this.badges();
   },
   myNotifs() {
@@ -1276,7 +1284,25 @@ const App = {
   },
   unread() { const r = new Set(Store.d.reads[this.s.id] || []); return this.myNotifs().filter(n => !r.has(n.id)); },
   markRead() { const ids = this.myNotifs().map(n => n.id); Store.set(d => { d.reads[this.s.id] = ids.slice(0, 200); }); this.badges(); },
-  primeSeen() { this.seen = new Set(Store.d.notifs.map(n => n.id)); this.alarmSeen = new Set(Store.d.incidents.map(i => i.id)); },
+  primeSeen() { this.seen = new Set(Store.d.notifs.map(n => n.id)); this.alarmSeen = new Set(Store.d.incidents.map(i => i.id)); this.boardedSeen = new Set(Store.d.bookings.filter(b => b.status === 'boarded').map(b => b.id)); },
+  /* The student's current ride: a booking the driver has confirmed as boarded, on a vehicle that is still running. */
+  myRide() {
+    if (!this.s || this.s.role !== 'student') return null; const now = Date.now(); let best = null;
+    Store.d.bookings.forEach(b => { if (b.user === this.s.id && b.status === 'boarded' && b.boardedAt && now - b.boardedAt < 3 * 3600e3 && !this.rideDone.has(b.id) && (!best || b.boardedAt > best.boardedAt)) best = b; });
+    const v = best && vehicleById(best.vehicle); return v && vState(v).visible ? best : null;
+  },
+  rideInit(st, b) { st.mode = 'ride'; st.vid = b.vehicle; st.rid = null; st.rideId = b.id; st.moved = null; st.arrivedAt = null; st.open = false; },
+  beginRide(b) {
+    const st = this.ui.home || (this.ui.home = { mode: 'stop', vid: null, rid: null, open: false }); this.rideInit(st, b);
+    vibrate([40, 40, 40]); toast('You are on board', `Tracking ${b.vehicle} to ${STOPS[HUB].name}`, 'ok');
+    if (this.tab === 'home') this.refresh(); else this.go('home');
+  },
+  rideCheck() {
+    if (!this.s || this.s.role !== 'student') return;
+    const fresh = Store.d.bookings.find(b => b.user === this.s.id && b.status === 'boarded' && b.boardedAt && Date.now() - b.boardedAt < 3 * 3600e3 && !this.boardedSeen.has(b.id));
+    Store.d.bookings.forEach(b => { if (b.status === 'boarded') this.boardedSeen.add(b.id); });
+    if (fresh && vehicleById(fresh.vehicle) && vState(vehicleById(fresh.vehicle)).visible) { this.rideDone.delete(fresh.id); this.beginRide(fresh); return true; }
+  },
   announce() {
     if (this.s.role === 'admin') { Store.d.incidents.filter(i => !this.alarmSeen.has(i.id)).forEach(i => { this.alarmSeen.add(i.id); if (i.kind === 'emergency' && i.status === 'open') Admin.alarm(i); else toast(`Delay on Route ${(i.route || '').slice(1)}`, `${i.vehicle}: ${i.cat}, about ${i.delay} min`); }); return; }
     this.myNotifs().filter(n => !this.seen.has(n.id)).slice(0, 3).forEach(n => { this.seen.add(n.id); toast(n.title, n.body, n.kind === 'danger' ? 'danger' : ''); if (n.kind === 'danger') vibrate([200, 100, 200]); });
@@ -1440,7 +1466,8 @@ function suggestCard() {
 }
 /* ---------- Home: live map (UC-03, UC-04) ---------- */
 SCREENS.home = el => {
-  const st = App.ui.home || (App.ui.home = { mode: 'stop', vid: null, rid: null, open: false });
+  const fresh = !App.ui.home, st = App.ui.home || (App.ui.home = { mode: 'stop', vid: null, rid: null, open: false });
+  if (fresh) { const rb = App.myRide(); if (rb) App.rideInit(st, rb); }
   const desk = () => innerWidth >= 960;
   const nRun = () => Store.d.vehicles.filter(v => vState(v).visible).length;
   el.innerHTML = `<div class="home" id="homeRoot">
@@ -1451,10 +1478,11 @@ SCREENS.home = el => {
   const map = new ShuttleMap(root, {
     selStop: Student.stop(), selVehicle: st.vid, focus: st.rid,
     padding: () => desk() ? { top: 90, right: 80, bottom: 40, left: 470 } : { top: 84, right: 64, bottom: 330, left: 104 },
-    onVehicle: vid => { st.mode = 'vehicle'; st.vid = vid; map.setVehicle(vid); paint(); toggle(true); },
+    onVehicle: vid => { const mine = st.rideId && Store.d.bookings.some(b => b.id === st.rideId && b.vehicle === vid); st.mode = mine ? 'ride' : 'vehicle'; st.vid = vid; map.setVehicle(vid); paint(); toggle(!mine); },
     onStop: sid => { Student.setStop(sid); map.setStop(sid); st.mode = 'stop'; st.vid = null; map.setVehicle(null); paint(); toast(`Boarding at ${STOPS[sid].name}`, '', '', 1800); },
   });
   root.insertBefore(map.box, root.firstChild);
+  if (st.mode === 'ride') map.rideCam(st.vid, true);
   // Draggable bottom sheet (mobile)
   const grab = $('#grab', el); let sy = null, base = 0, dy = 0;
   const toggle = o => { st.open = o; sheet.classList.toggle('open', o); };
@@ -1506,7 +1534,40 @@ SCREENS.home = el => {
       <ol class="tl" style="--c:${r.color}">${order.map((sid, i) => { const m = etaFor(v, sid); return `<li class="${i === 0 ? 'next' : ''}"><b>${esc(STOPS[sid].name)}</b><small>${i === 0 && ns.at ? 'Here now' : `${etaText(m)}${isFinite(m) ? `, ${fmtTime(Date.now() + m * MIN)}` : ''}`}</small></li>`; }).join('')}</ol>
       <button class="btn primary block" data-act="bookroute" data-r="${r.id}">${icon('book')}Reserve a seat on Route ${r.id.slice(1)}</button>`;
   };
-  const paint = () => { body.innerHTML = st.mode === 'vehicle' ? vehPanel() : st.mode === 'route' ? routePanel() : stopPanel(); App.badges(); };
+  const endRide = () => { if (st.rideId) App.rideDone.add(st.rideId); st.rideId = null; st.mode = 'stop'; st.vid = null; st.moved = null; st.arrivedAt = null; map.setFocus(null); };
+  const rideBanner = () => {
+    if (!st.rideId) return '';
+    const b = Store.d.bookings.find(x => x.id === st.rideId), v = b && vehicleById(b.vehicle);
+    if (!b || b.status !== 'boarded' || !v || !vState(v).visible) { st.rideId = null; return ''; }
+    return `<div class="list" style="margin-bottom:12px"><button class="lrow" data-act="toride"><span class="lrow-ico">${icon(v.type === 'van' ? 'van' : 'busFront')}</span><span class="grow"><b>Your ride is live</b><small>${esc(v.id)} to ${esc(STOPS[HUB].name)}, tap to track</small></span>${icon('right')}</button></div>`;
+  };
+  const rideP = () => {
+    const b = Store.d.bookings.find(x => x.id === st.rideId), v = b && vehicleById(b.vehicle), info = v && rideInfo(v);
+    if (!b || b.status !== 'boarded' || !info) { endRide(); return stopPanel(); }
+    const s = info.s, r = s.r, hub = STOPS[HUB], vs = vehicleStatus(v), ns = nextStop(v), hold = s.holdLeft / MIN, following = map.followV === v.id;
+    if (st.moved == null) st.moved = !info.layover || Date.now() - b.boardedAt > LAYOVER * MIN;
+    if (!info.layover) st.moved = true;
+    const arrived = info.layover && st.moved;
+    if (arrived) { if (!st.arrivedAt) st.arrivedAt = Date.now(); if (Date.now() - st.arrivedAt > 90e3) { endRide(); return stopPanel(); } } else st.arrivedAt = null;
+    const fin = isFinite(info.min), at = Date.now() + info.min * MIN, soon = fin && info.min < .75, m = r.stops.length;
+    const top = `<div class="row between" style="margin-bottom:10px"><span class="chip-s ok"><span class="live-dot"></span>${following ? 'Tracking your ride' : 'Live position'}</span>${!following ? `<button class="linkbtn" data-act="recenter">${icon('locate')}Re-centre</button>` : ''}</div>`;
+    const who = `${vLabel(v)}, ${esc(v.plate)}, seat ${b.seat}`;
+    if (arrived) return top + `<article class="next" style="--c:${r.color}"><div class="next-head">${badge(r)}<span class="grow"><b>You have arrived at ${esc(hub.name)}</b><small>${who}</small></span></div><div class="next-eta"><span class="num">Arrived</span></div></article>
+      <button class="btn primary block" data-act="endride" style="margin-top:14px">Done</button>`;
+    const stopsLeft = []; const nk = info.layover ? 1 : (s.w.mode === 'dwell' ? s.w.stop : (s.w.leg + 1) % m);
+    if (nk > 0) for (let k = nk; k < m; k++) stopsLeft.push(k);
+    const stopMin = k => info.layover ? info.left + s.S.A[k] : Math.max(0, s.S.A[k] - s.p) + hold;
+    const foot = !fin ? 'The vehicle is stopped, so the estimate is paused.' : info.layover ? `Leaves ${esc(hub.short || hub.name)} in ${Math.max(1, Math.round(info.left))} min, back at about ${fmtTime(at)}.` : `Arrives at about ${fmtTime(at)}.`;
+    return top + `<article class="next" style="--c:${r.color}">
+        <div class="next-head">${badge(r)}<span class="grow"><b>Heading to ${esc(hub.name)}</b><small>${who}</small></span><span class="chip-s ${vs.cls}">${esc(vs.text)}</span></div>
+        <div class="next-eta"><span class="num">${!fin ? '—' : soon ? 'Now' : Math.round(info.min)}</span>${fin && !soon ? '<span class="unit">min</span>' : ''}</div>
+        <div class="next-foot"><span class="small">${foot}</span></div>
+      </article>
+      <div class="vnext" style="margin-top:14px"><small>${ns.at ? 'At stop now' : 'Next stop'}</small><div class="row between"><b>${esc(STOPS[ns.sid].name)}</b><b class="num">${ns.at ? `Leaves in ${Math.max(1, Math.round(ns.dep))} min` : etaText(ns.min)}</b></div></div>
+      <ol class="tl" style="--c:${r.color}">${stopsLeft.map((k, i) => { const mm = stopMin(k); return `<li class="${i === 0 ? 'next' : ''}"><b>${esc(STOPS[r.stops[k]].name)}</b><small>${etaText(mm)}${isFinite(mm) ? `, ${fmtTime(Date.now() + mm * MIN)}` : ''}</small></li>`; }).join('')}<li class="end"><b>${esc(hub.name)}</b><small>${fin ? `${etaText(info.min)}, ${fmtTime(at)}` : 'Stopped'}</small></li></ol>
+      <button class="btn ghost block" data-act="endride" style="margin-top:14px">Stop tracking</button>`;
+  };
+  const paint = () => { body.innerHTML = st.mode === 'ride' ? rideP() : rideBanner() + (st.mode === 'vehicle' ? vehPanel() : st.mode === 'route' ? routePanel() : stopPanel()); App.badges(); };
   paint();
   body.addEventListener('click', e => {
     const a = e.target.closest('[data-act],[data-vid],[data-rid]'); if (!a) return;
@@ -1516,7 +1577,9 @@ SCREENS.home = el => {
     if (act === 'pick') Student.pickStop(sid => { map.setStop(sid, true); paint(); });
     if (act === 'back') { if (st.mode === 'vehicle' && st.rid) { st.mode = 'route'; } else { st.mode = 'stop'; st.rid = null; map.setFocus(null); } st.vid = null; map.setVehicle(null); paint(); }
     if (act === 'bookroute') { App.draft = { route: a.dataset.r, stop: Student.stop() }; App.go('book'); }
-    if (act === 'recenter') { map.setVehicle(st.vid); map.panToVehicle(st.vid); paint(); }
+    if (act === 'recenter') { if (st.mode === 'ride') map.rideCam(st.vid); else { map.setVehicle(st.vid); map.panToVehicle(st.vid); } paint(); }
+    if (act === 'toride') { const b = Store.d.bookings.find(x => x.id === st.rideId); if (b) { st.mode = 'ride'; st.vid = b.vehicle; st.rid = null; map.rideCam(st.vid); paint(); } }
+    if (act === 'endride') { endRide(); paint(); }
   });
   return {
     live() { if (!$('.scrim')) { const y = body.scrollTop; paint(); body.scrollTop = y; } const n = $('#nrun', el); if (n) n.textContent = nRun() + ' vehicles live'; },
