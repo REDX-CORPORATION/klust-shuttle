@@ -527,6 +527,37 @@ button.lrow:hover{background:linear-gradient(90deg,transparent,var(--surface-2) 
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--brand) 30%,transparent)}50%{box-shadow:0 0 0 16px color-mix(in srgb,var(--brand) 0%,transparent)}}
 @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(3px)}}
 @keyframes alarmbg{to{background:rgba(110,12,6,.92)}}
+
+
+/* closest-stop suggestion */
+.locbtn{display:flex;align-items:center;gap:12px;width:100%;padding:11px 14px;border:1px dashed var(--focus);border-radius:14px;background:var(--info-bg);color:var(--info);text-align:left;margin-bottom:12px;transition:background-color .2s,transform .12s}
+.locbtn:hover{background:color-mix(in srgb,var(--info-bg) 82%,var(--focus) 18%)}.locbtn:active{transform:scale(.99)}.locbtn:disabled{opacity:.6}
+.locbtn .ico{width:20px;height:20px;flex:none}.locbtn b{display:block;font-size:14.5px;font-weight:700}.locbtn small{display:block;font-size:12.5px;opacity:.85;font-weight:500;margin-top:2px}
+.locbtn.sm{padding:8px 12px;margin:-4px 0 12px}.locbtn.sm b{font-size:13.5px}
+.nearcard{padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface);box-shadow:var(--sh-1);margin-bottom:12px}
+.nearcard>small{display:block;font-size:11.5px;font-weight:750;color:var(--ok);text-transform:uppercase;letter-spacing:.05em}
+.nearcard>b{display:block;font-size:16px;font-weight:750;margin-top:2px}
+.distchip{font-size:11.5px;font-weight:700;color:var(--info);background:var(--info-bg);padding:1px 7px;border-radius:999px}
+.chipd{font-size:11.5px;color:var(--muted);font-weight:700}
+.locmsg{display:flex;align-items:center;gap:8px;margin:0 0 12px}
+.you{z-index:6;pointer-events:none}.you-dot{position:absolute;left:0;top:0;width:16px;height:16px;transform:translate(-50%,-50%);border-radius:50%;background:#2F6FEB;border:3px solid #fff;box-shadow:0 1px 6px rgba(0,0,0,.35)}
+.you-pulse{position:absolute;left:0;top:0;width:16px;height:16px;transform:translate(-50%,-50%);border-radius:50%;background:rgba(47,111,235,.35);animation:youp 2s ease-out infinite}
+@keyframes youp{to{transform:translate(-50%,-50%) scale(3.2);opacity:0}}
+/* resume live tracking */
+.resume{margin-bottom:12px;border:1px solid var(--ok);background:var(--ok-bg);border-radius:14px;padding:4px 4px 2px}
+.resume-main{display:flex;align-items:center;gap:12px;width:100%;padding:10px;text-align:left;border-radius:10px}
+.resume-main b{display:block;font-size:14.5px;color:var(--ok)}.resume-main small{display:block;font-size:12.5px;color:var(--ink-2);margin-top:2px}
+.resume .linkbtn.subtle{margin:0 auto 4px}
+/* payments admin + checkout extras */
+.pmrow{padding:12px 0;border-bottom:1px solid var(--line-2)}.pmrow:last-child{border-bottom:0}
+.pm-main{display:flex;align-items:center;gap:12px}.pm-main b{display:block;font-weight:650;font-size:14.5px}.pm-main small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+.pm-foot{display:flex;align-items:center;gap:4px;margin:8px 0 0 50px;font-size:12.5px;color:var(--muted);flex-wrap:wrap}
+.pmrow.off .pm-main .lrow-ico,.pmrow.off .pm-main .grow{opacity:.5}
+.iconbtn.t-danger-i:hover{color:var(--danger);background:var(--danger-bg)}
+.linkbtn.inl{padding:0 0 0 6px;font-size:12.5px}
+.sugbar{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:14px;background:var(--info-bg);color:var(--info);margin-bottom:12px}
+.sugbar .ico{width:20px;height:20px;flex:none}.sugbar b{display:block;font-size:14px}.sugbar small{display:block;font-size:12.5px;opacity:.9}
+@media (max-width:420px){.role-admin .navi{font-size:10.5px}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;animation-delay:0s!important;transition-duration:.01ms!important}}
 @media print{.nav,.sos-btn,#toasts,.hdr-a{display:none!important}}
 
@@ -670,12 +701,29 @@ const PH = ['2026-01-01', '2026-05-01', '2026-08-31', '2026-09-16', '2026-12-25'
 const DAYS = { wk: 'Mon to Fri', we: 'Sat, Sun and public holidays', all: 'Every day' };
 const RUNS = { wk: 'Monday to Friday', we: 'at weekends and on public holidays', all: 'every day' };
 const PAY = {
-  qr: { label: 'DuitNow QR', sub: 'Any Malaysian banking or e-wallet app', icon: 'qr' },
-  nfc: { label: 'Tap to pay', sub: 'Google Pay, Apple Pay or Samsung Wallet', icon: 'nfc' },
-  transit: { label: "Touch 'n Go card", sub: 'Stored-value transit card', icon: 'wallet' },
-  card: { label: 'Debit or credit card', sub: 'Visa, Mastercard or MyDebit', icon: 'card' },
-  cash: { label: 'Cash on board', sub: 'Reserve now, pay the driver when you board', icon: 'cash' },
+  qr: { label: 'DuitNow QR', sub: 'Any Malaysian banking or e-wallet app', icon: 'qr', kind: 'qr' },
+  nfc: { label: 'Tap to pay', sub: 'Google Pay, Apple Pay or Samsung Wallet', icon: 'nfc', kind: 'nfc' },
+  transit: { label: "Touch 'n Go card", sub: 'Stored-value transit card', icon: 'wallet', kind: 'transit' },
+  card: { label: 'Debit or credit card', sub: 'Visa, Mastercard or MyDebit', icon: 'card', kind: 'card' },
+  cash: { label: 'Cash on board', sub: 'Reserve now, pay the driver when you board', icon: 'cash', kind: 'cash' },
 };
+/* More options an admin can switch on from the Payments tab. `kind` chooses the checkout animation. */
+const PAY_MORE = {
+  tng: { label: "Touch 'n Go eWallet", sub: 'Pay in the Touch \'n Go eWallet app', icon: 'wallet', kind: 'wallet' },
+  boost: { label: 'Boost', sub: 'Pay with your Boost wallet', icon: 'wallet', kind: 'wallet' },
+  grab: { label: 'GrabPay', sub: 'Pay with your GrabPay wallet', icon: 'wallet', kind: 'wallet' },
+  shopee: { label: 'ShopeePay', sub: 'Pay with your ShopeePay wallet', icon: 'wallet', kind: 'wallet' },
+  fpx: { label: 'FPX Online Banking', sub: 'Pay through your bank\u2019s secure page', icon: 'card', kind: 'wallet', msg: 'Waiting for your bank to confirm' },
+};
+/* The live list of checkout options lives in the saved data (Store.d.payMethods) so admins can change it. */
+function defaultPayMethods() { return Object.entries(PAY).map(([id, p]) => ({ id, label: p.label, sub: p.sub, icon: p.icon, kind: p.kind, on: true })); }
+function ensurePay(d) { if (!Array.isArray(d.payMethods) || !d.payMethods.length) d.payMethods = defaultPayMethods(); return d; }
+const allPay = () => (Store.d && Store.d.payMethods) || defaultPayMethods();
+const payMethods = () => allPay().filter(m => m.on);
+const payOn = id => payMethods().some(m => m.id === id);
+/* Works even for a method that was removed after someone paid with it (old bookings keep their label). */
+const payInfo = id => allPay().find(m => m.id === id) || (PAY[id] && { id, ...PAY[id] }) || (PAY_MORE[id] && { id, ...PAY_MORE[id] }) || { id, label: String(id || 'Unknown'), sub: '', icon: 'wallet', kind: 'wallet' };
+const payName = b => b.payLabel || payInfo(b.pay).label;
 const R_EARTH = 6371;
 function hav(a, b) { const t = x => x * Math.PI / 180, dLat = t(b.lat - a.lat), dLng = t(b.lng - a.lng); const h = Math.sin(dLat / 2) ** 2 + Math.cos(t(a.lat)) * Math.cos(t(b.lat)) * Math.sin(dLng / 2) ** 2; return 2 * R_EARTH * Math.asin(Math.sqrt(h)); }
 // Estimated driving minutes per leg: road distance ~1.4x straight line, 38 km/h on highways, 22 km/h locally
@@ -712,7 +760,7 @@ function seed() {
       A22KL0318: { name: 'Daniel Lim', program: 'Bachelor of Architecture', eligible: true },
       A19KL0777: { name: 'Hafiz Rosli', program: 'BSc Quantity Surveying', eligible: false },
     },
-    bookings: [], incidents: [], notifs: [], reads: {}, boarded: {}, log: [], prefs: {},
+    bookings: [], incidents: [], notifs: [], reads: {}, boarded: {}, log: [], prefs: { A24KL0001: { stop: 'KTMS' } }, payMethods: defaultPayMethods(),
     recs: [
       { id: 'REC1', status: 'pending', title: 'Move VAN-05 to Route 1 on weekdays', why: 'Route 1 is forecast at about 125% of seats between 7:30 and 9:00 am. VAN-05 is idle Monday to Friday because Route 2 only runs at weekends.', impact: 'Route 1 gets a third vehicle. Route 2 keeps BUS-05 at weekends.', action: { type: 'assign', vehicle: 'VAN-05', route: 'R1' }, flag: false },
       { id: 'REC2', status: 'pending', title: 'Skip Unipark Condominium on the Sungai Besi Express', why: 'Unipark Condominium accounts for 6% of Route 3 boardings. Skipping it saves about 4 minutes per trip.', impact: 'Route 3 trips get about 4 minutes shorter.', action: { type: 'note' }, flag: true, fairness: 'Unipark houses many first-year and international students without cars, and Route 3 is their only direct link to MRT Sungai Besi. Low boardings may reflect the 30-minute gap between trips rather than low need.' },
@@ -739,7 +787,7 @@ function migrateNet(d) {
 const Store = {
   d: null, listeners: new Set(),
   load() {
-    try { const raw = localStorage.getItem(KEY); if (raw) { const x = JSON.parse(raw); if (x && x.v === 2) { this.d = migrateNet(x); this.persist(); return; } } } catch (e) { }
+    try { const raw = localStorage.getItem(KEY); if (raw) { const x = JSON.parse(raw); if (x && x.v === 2) { this.d = ensurePay(migrateNet(x)); this.persist(); return; } } } catch (e) { }
     this.d = seed(); seedBookings(this.d); this.persist();
   },
   persist() { try { localStorage.setItem(KEY, JSON.stringify(this.d)); } catch (e) { console.warn('Storage unavailable', e); } },
@@ -749,7 +797,7 @@ const Store = {
   emit(src) { this.listeners.forEach(f => { try { f(src); } catch (e) { console.error(e); } }); },
 };
 window.addEventListener('storage', e => {
-  if (e.key === KEY) { try { const x = JSON.parse(e.newValue); if (x && x.v === 2) { Store.d = migrateNet(x); } else Store.load(); Store.emit('remote'); } catch (err) { } }
+  if (e.key === KEY) { try { const x = JSON.parse(e.newValue); if (x && x.v === 2) { Store.d = ensurePay(migrateNet(x)); } else Store.load(); Store.emit('remote'); } catch (err) { } }
   if (e.key === Geo.KEY) { Geo.load(); Geo.emit(); }
 });
 const routeById = id => Store.d.routes.find(r => r.id === id);
@@ -1144,6 +1192,11 @@ class ShuttleMap {
   }
   setFocus(rid) { this.focus = rid; this.paint(); this.map.user = false; this.fit(true); }
   setStop(sid, pan) { this.selS = sid; this.paint(); if (pan) { const s = STOPS[sid], [x, y] = merc(s.lat, s.lng); this.map.user = true; this.map.flyTo(x, y, Math.max(this.map.z, 15)); } }
+  setUser(pos) {
+    if (this.um) { this.map.removeMarker(this.um); this.um = null; } if (!pos) return;
+    const el = document.createElement('div'); el.className = 'you'; el.title = 'You are here'; el.innerHTML = '<span class="you-pulse"></span><span class="you-dot"></span>';
+    this.um = this.map.addMarker(el, pos.lat, pos.lng);
+  }
   setVehicle(vid) { this.selV = vid; this.followV = vid; this.paint(); }
   panToVehicle(vid) { const v = vehicleById(vid), s = v && vState(v); if (!s || !s.visible) return; const p = vPos(s), [x, y] = merc(p.lat, p.lng), pd = this.o.padding ? this.o.padding() : { left: 0, right: 0, top: 0, bottom: 0 }; const W = 256 * 2 ** Math.max(this.map.z, 14); this.map.user = true; this.map.flyTo(x - ((pd.left || 0) - (pd.right || 0)) / 2 / W, y - ((pd.top || 0) - (pd.bottom || 0)) / 2 / W, Math.max(this.map.z, 14)); }
   rideCam(vid, instant) { const v = vehicleById(vid), s = v && vState(v); if (!s || !s.visible) return; this.setVehicle(vid); const p = vPos(s), [x, y] = merc(p.lat, p.lng), pd = this.o.padding ? this.o.padding() : { left: 0, right: 0, top: 0, bottom: 0 }, z = 16, W = 256 * 2 ** z; this.map.user = true; this.map.flyTo(x - ((pd.left || 0) - (pd.right || 0)) / 2 / W, y - ((pd.top || 0) - (pd.bottom || 0)) / 2 / W, z, instant ? 0 : 900); }
@@ -1201,7 +1254,7 @@ matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => wi
 const ROLES = {
   student: { label: 'Student', tabs: [{ id: 'home', label: 'Home', icon: 'home' }, { id: 'book', label: 'Book', icon: 'book' }, { id: 'tickets', label: 'Tickets', icon: 'ticket' }, { id: 'account', label: 'Account', icon: 'user' }], extra: ['alerts'] },
   driver: { label: 'Driver', tabs: [{ id: 'trip', label: 'Trip', icon: 'bus' }, { id: 'manifest', label: 'Passengers', icon: 'users' }, { id: 'verify', label: 'Verify', icon: 'scan' }, { id: 'report', label: 'Report', icon: 'alert' }, { id: 'account', label: 'Account', icon: 'user' }], extra: ['alerts'] },
-  admin: { label: 'Operations', tabs: [{ id: 'overview', label: 'Overview', icon: 'dash' }, { id: 'incidents', label: 'Incidents', icon: 'siren' }, { id: 'routes', label: 'Routes', icon: 'route' }, { id: 'fleet', label: 'Fleet', icon: 'bus' }, { id: 'insights', label: 'Insights', icon: 'chart' }, { id: 'account', label: 'Account', icon: 'user' }], extra: [] },
+  admin: { label: 'Operations', tabs: [{ id: 'overview', label: 'Overview', icon: 'dash' }, { id: 'incidents', label: 'Incidents', icon: 'siren' }, { id: 'routes', label: 'Routes', icon: 'route' }, { id: 'fleet', label: 'Fleet', icon: 'bus' }, { id: 'insights', label: 'Insights', icon: 'chart' }, { id: 'payments', label: 'Payments', icon: 'wallet' }, { id: 'account', label: 'Account', icon: 'user' }], extra: [] },
 };
 const SCREENS = {};
 
@@ -1321,6 +1374,17 @@ function bellBtn() { return `<button class="iconbtn bell" data-goto="alerts" ari
 document.addEventListener('click', e => { const g = e.target.closest('[data-goto]'); if (g && App.s) App.go(g.dataset.goto); });
 
 /* =================== Sign in =================== */
+function demoTimetable() {
+  const names = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const C = (dow, start, end, code, name, location, type = 'Lecture') => ({ dow, day: names[dow], start, end, code, name, lecturer: 'Demo Lecturer', group: 'G1', type, location });
+  return [
+    C(1, '08:30', '10:30', 'CSC2103', 'Data Structures', 'Block 9, Lab 3'), C(1, '14:00', '16:00', 'CSC2204', 'Web Engineering', 'Faculty of Architecture, Studio 2', 'Tutorial'),
+    C(2, '10:00', '12:00', 'MAT2101', 'Linear Algebra', 'Block 9, Room 4-02'), C(2, '15:00', '17:00', 'CSC2310', 'Mobile Computing', 'Unipark Condominium, Study Hall', 'Lab'),
+    C(3, '09:00', '11:00', 'CSC2305', 'Software Engineering', 'Block 9, Lab 1'), C(3, '15:00', '17:00', 'PRJ3001', 'Capstone Project', 'Unipark Condominium, Study Hall', 'Tutorial'),
+    C(4, '08:30', '10:30', 'CSC2410', 'Databases', 'Block 9, Lab 2'), C(4, '13:00', '15:00', 'CSC2204', 'Web Engineering', 'Faculty of Architecture, Studio 2'),
+    C(5, '09:00', '11:00', 'ENG2001', 'Technical Writing', 'Block 9, Room 2-07'),
+  ];
+}
 const Login = {
   role: 'student', step: 'cred', map: null,
   render(root) {
@@ -1352,7 +1416,7 @@ const Login = {
         <p id="lerr" class="errtxt" role="alert" hidden></p>
         <button class="btn primary block lg" id="lbtn" type="submit"><span class="btn-label">Sign in</span></button>
       </form>
-      <p class="login-note">${icon('cash')}<span>No smartphone? Show your student ID to the driver and pay cash on board.</span></p>${creditsHtml()}`;
+      ${payOn('cash') ? `<p class="login-note">${icon('cash')}<span>No smartphone? Show your student ID to the driver and pay cash on board.</span></p>` : ''}${creditsHtml()}`;
     c.onclick = e => {
       const r = e.target.closest('[data-role]'); if (r) { this.role = r.dataset.role; $$('[data-role]', c).forEach(b => { b.setAttribute('aria-pressed', b === r); b.setAttribute('aria-checked', b === r); }); }
       const eye = e.target.closest('[data-act="eye"]'); if (eye) { const p = $('#lp'); const show = p.type === 'password'; p.type = show ? 'text' : 'password'; eye.innerHTML = icon(show ? 'eyeoff' : 'eye'); eye.setAttribute('aria-label', show ? 'Hide password' : 'Show password'); }
@@ -1365,6 +1429,11 @@ const Login = {
     err.hidden = true; if (!uRaw || !p) return fail('Enter your username and password.');
     btn.disabled = true; btn.innerHTML = '<span class="spin"></span><span class="btn-label">Signing in</span>';
 
+    if (this.role === 'student' && uRaw.toLowerCase() === DEMO_USER && p === DEMO_PASS) { // offline demo account with a sample timetable
+      await sleep(600);
+      Store.set(d => { const u = d.users.A24KL0001 || (d.users.A24KL0001 = { name: 'Demo Student', program: 'BSc (Hons) Computer Science' }); u.eligible = true; if (!(u.timetable && u.timetable.length)) u.timetable = demoTimetable(); });
+      this.finish({ role: 'student', id: 'A24KL0001' }); return;
+    }
     if (this.role === 'student') {
       if (!KLUST_RELAY_URL || KLUST_RELAY_URL === 'PASTE_YOUR_WORKER_URL_HERE') { $('#lp').value = ''; return fail('Login relay not configured yet \u2014 see setup notes.'); }
       let data;
@@ -1390,6 +1459,25 @@ const Login = {
   finish(s) { const l = $('.login'); l && l.classList.add('leaving'); setTimeout(() => { this.map && this.map.destroy(); this.map = null; App.signIn(s); }, reduced() ? 0 : 420); },
 };
 
+/* =================== Location: closest stop (runs on the device only) =================== */
+const Locate = {
+  last: null, // { lat, lng, acc, at } kept in memory only. Never saved to storage, never sent anywhere.
+  fresh() { return this.last && Date.now() - this.last.at < 10 * MIN ? this.last : null; },
+  ok() { return typeof navigator !== 'undefined' && 'geolocation' in navigator; },
+  get() {
+    return new Promise((res, rej) => {
+      if (!this.ok()) { rej({ code: 0 }); return; }
+      navigator.geolocation.getCurrentPosition(p => { this.last = { lat: p.coords.latitude, lng: p.coords.longitude, acc: p.coords.accuracy || 0, at: Date.now() }; res(this.last); }, e => rej(e || { code: 2 }), { enableHighAccuracy: true, timeout: 12000, maximumAge: 20000 });
+    });
+  },
+  dist(km) { return km < 1 ? `${Math.max(10, Math.round(km * 100) * 10)} m` : `${km.toFixed(km < 10 ? 1 : 0)} km`; },
+  walk(km) { return km > 3 ? '' : `about ${Math.max(1, Math.round(km * 16.25))} min walk`; }, // 1.3x road factor at 80 m per minute
+  near(km) { return [this.dist(km), this.walk(km)].filter(Boolean).join(', '); },
+  err(e) { const c = e && e.code; return c === 1 ? 'Location is off for this site. Allow it in your browser settings, or pick a stop from the list.' : c === 0 ? 'This browser cannot share its location. Pick a stop from the list instead.' : c === 3 ? 'Finding you took too long. Try again in an open area, or pick a stop from the list.' : 'Could not work out where you are. Try again, or pick a stop from the list.'; },
+  /* Stops sorted nearest first. `tie` (optional) breaks exact ties, e.g. two stops on the same spot, by who has the sooner shuttle. */
+  rank(pos, ids, tie) { return ids.map(id => ({ id, km: hav(pos, STOPS[id]) })).sort((a, b) => (a.km - b.km) || ((tie ? tie(a.id) : 0) - (tie ? tie(b.id) : 0))); },
+};
+
 /* =================== Student =================== */
 const Student = {
   stop() { const s = Store.d.prefs[App.s.id]?.stop; return STOPS[s] ? s : HUB; },
@@ -1401,11 +1489,36 @@ const Student = {
     liveRoutes().forEach(r => { const k = r.stops.indexOf(sid); if (k < 0) return; routeVehicles(r.id).forEach(v => { const m = etaFor(v, sid, t); if (m == null) return; out.push({ r, v, m, hub: k === 0, next: STOPS[r.stops[(k + 1) % r.stops.length]], load: onboard(v, t) }); }); });
     return out.sort((a, b) => a.m - b.m);
   },
-  pickStop(cb) {
-    const cur = this.stop(), served = this.served();
-    const groups = [['On campus', Object.keys(STOPS).filter(s => STOPS[s].campus)], ['Stations and malls', Object.keys(STOPS).filter(s => !STOPS[s].campus)]];
-    openDialog({ title: 'Where are you boarding?', html: `<p class="small muted" style="margin:-6px 0 12px">Departures are shown for the stop you pick. Your location is never used.</p>${groups.map(([g, ids]) => `<h4 class="grp">${g}</h4><div class="list">${ids.filter(s => served.has(s)).map(id => `<button class="lrow" data-sid="${id}"><span class="lrow-ico">${icon(STOPS[id].rail ? 'train' : 'pin')}</span><span class="grow"><b>${esc(STOPS[id].name)}</b><small class="row" style="gap:4px;margin-top:3px">${liveRoutes().filter(r => r.stops.includes(id)).map(r => badge(r, 'xs')).join('')}</small></span>${id === cur ? `<span class="tick">${icon('check')}</span>` : ''}</button>`).join('')}</div>`).join('')}`,
-      onMount: (b, close) => b.addEventListener('click', e => { const x = e.target.closest('[data-sid]'); if (x) { this.setStop(x.dataset.sid); close(); cb && cb(x.dataset.sid); } }) });
+  pickStop(cb, opts = {}) {
+    const cur = this.stop(), served = this.served(), ids = Object.keys(STOPS).filter(x => served.has(x));
+    const tie = id => { const d = this.departures(id).find(x => isFinite(x.m)); return d ? d.m : 1e9; };
+    const row = (id, pos) => `<button class="lrow" data-sid="${id}"><span class="lrow-ico">${icon(STOPS[id].rail ? 'train' : 'pin')}</span><span class="grow"><b>${esc(STOPS[id].name)}</b><small class="row" style="gap:4px;margin-top:3px">${pos ? `<span class="distchip">${Locate.dist(hav(pos, STOPS[id]))}</span>` : ''}${liveRoutes().filter(r => r.stops.includes(id)).map(r => badge(r, 'xs')).join('')}</small></span>${id === cur ? `<span class="tick">${icon('check')}</span>` : ''}</button>`;
+    const grouped = () => [['On campus', ids.filter(x => STOPS[x].campus)], ['Stations and malls', ids.filter(x => !STOPS[x].campus)]].map(([g, l]) => `<h4 class="grp">${g}</h4><div class="list">${l.map(id => row(id)).join('')}</div>`).join('');
+    const sorted = pos => `<h4 class="grp">Nearest first</h4><div class="list">${Locate.rank(pos, ids, tie).map(x => row(x.id, pos)).join('')}</div>`;
+    const sugg = pos => {
+      const best = Locate.rank(pos, ids, tie)[0], s = STOPS[best.id], dep = this.departures(best.id).find(x => isFinite(x.m)), far = best.km > 5;
+      return `<div class="nearcard"><small>Closest to you</small><b>${esc(s.name)}</b><span class="small muted">${esc(Locate.near(best.km))}</span>
+        <div class="row" style="gap:6px;margin-top:8px;flex-wrap:wrap">${liveRoutes().filter(r => r.stops.includes(best.id)).map(r => badge(r, 'xs')).join('')}<span class="small">${dep ? `Next shuttle ${esc(etaText(dep.m))}` : 'No shuttle running right now'}</span></div>
+        ${far ? `<p class="small" style="color:var(--warn);margin:8px 0 0">You are a long way from every stop, so double-check this is where you want to board.</p>` : ''}
+        <button class="btn primary sm block" style="margin-top:10px" data-sid="${best.id}">Board at ${esc(s.short || s.name)}</button></div>`;
+    };
+    openDialog({ title: 'Where are you boarding?', html: `<button class="locbtn" data-act="locate">${icon('locate')}<span class="grow"><b>Use my current location</b><small>Suggests the closest stop. Used on this device only, never saved or shared.</small></span></button><div id="locres"></div><div id="stoplist">${grouped()}</div>`,
+      onMount: (b, close) => {
+        const res = $('#locres', b), lst = $('#stoplist', b), btn = $('[data-act="locate"]', b);
+        const show = pos => { res.innerHTML = sugg(pos); lst.innerHTML = sorted(pos); $('b', btn).textContent = 'Update my location'; };
+        const run = async () => { btn.disabled = true; res.innerHTML = '<p class="small muted locmsg"><span class="spin"></span>Finding the closest stop</p>'; try { show(await Locate.get()); } catch (e) { res.innerHTML = `<p class="small errtxt locmsg">${esc(Locate.err(e))}</p>`; } btn.disabled = false; };
+        b.addEventListener('click', e => { const x = e.target.closest('[data-sid]'); if (x) { this.setStop(x.dataset.sid); close(); cb && cb(x.dataset.sid, Locate.fresh()); return; } if (e.target.closest('[data-act="locate"]')) run(); });
+        const f = Locate.fresh(); if (f) show(f); if (opts.auto) run();
+      } });
+  },
+  /* For the Book screen: closest stop that has something to book, plus the soonest departure from it. */
+  nearestFor(pos, routes) {
+    const ids = [...new Set(routes.flatMap(r => r.stops))], now = Date.now(), cache = {};
+    const soonest = sid => { let pick = null; routes.filter(r => r.stops.includes(sid)).forEach(r => { for (let off = 0; off <= BOOK_MAX_DAYS; off++) { const x = tripsFor(r, off).map(t => ({ r, t, off, board: boardTime(r, t.ts, sid) })).find(y => y.board > now && seatMap(r, y.t).left > 0); if (x) { if (!pick || x.board < pick.board) pick = x; break; } } }); return pick; };
+    const pk = sid => sid in cache ? cache[sid] : (cache[sid] = soonest(sid));
+    const ranked = Locate.rank(pos, ids, sid => { const p = pk(sid); return p ? p.board : 1e15; });
+    const best = ranked.find(x => pk(x.id)) || ranked[0], p = pk(best.id);
+    return { sid: best.id, km: best.km, skip: ranked[0].id !== best.id ? ranked[0] : null, rid: p ? p.r.id : null, ts: p ? p.t.ts : null, board: p ? p.board : null, vid: p ? p.t.vehicle.id : null, off: p ? p.off : 0 };
   },
   timetable() { return (Store.d.users[App.s.id] && Store.d.users[App.s.id].timetable) || []; },
   matchStop(locationText) {
@@ -1419,27 +1532,44 @@ const Student = {
     for (let i = 0; i < 8; i++) { const d = new Date(from); d.setDate(d.getDate() + i); d.setHours(hh, mm, 0, 0); if (d.getDay() === cls.dow && d.getTime() > from) return d.getTime(); }
     return null;
   },
+  /* Next class -> the latest shuttle that still gets the student there with time to walk (8 min) plus a 4 min buffer.
+     Built from the bookable timetable (not live positions) so the trip it finds is one that can really be reserved. */
   suggestedTrip() {
     const tt = this.timetable(); if (!tt.length) return null;
     const now = Date.now();
     let best = null;
     tt.forEach(cl => { const ts = this.nextOccurrence(cl, now); if (ts && (!best || ts < best.ts)) best = { cl, ts }; });
     if (!best) return null;
-    const { cl, ts } = best;
-    const destSid = this.matchStop(cl.location);
-    const boardSid = this.stop();
-    const WALK = 8 * MIN, deadline = ts - WALK;
-    const searchFrom = Math.max(now, deadline - 90 * MIN);
-    const opts = this.departures(boardSid, searchFrom).filter(x => isFinite(x.m));
-    let choice = null;
-    for (const o of opts) {
-      const S = sched(o.r), bi = o.r.stops.indexOf(boardSid), di = o.r.stops.indexOf(destSid);
-      if (di < 0 || bi < 0) continue;
-      const travel = di === bi ? 0 : di > bi ? S.A[di] - S.A[bi] : (S.R - S.A[bi]) + S.A[di];
-      const depTs = searchFrom + o.m * MIN, arrTs = depTs + travel * MIN;
-      if (arrTs <= deadline) { choice = { o, depTs, arrTs }; break; }
-    }
-    return { cl, ts, destSid, boardSid, choice };
+    const { cl, ts } = best, destSid = this.matchStop(cl.location), boardSid = this.stop();
+    const out = { cl, ts, destSid, boardSid, choice: null, same: destSid === boardSid, tooFar: ts - now > BOOK_MAX_DAYS * DAY };
+    if (out.same) return out;
+    const deadline = ts - 12 * MIN, found = [];
+    liveRoutes().forEach(r => {
+      const bi = r.stops.indexOf(boardSid), di = r.stops.indexOf(destSid); if (bi < 0 || di < 0 || !routeVehicles(r.id).length) return;
+      const S = sched(r), travel = di > bi ? S.A[di] - S.A[bi] : (S.R - S.A[bi]) + S.A[di];
+      for (let off = 0; off <= BOOK_MAX_DAYS; off++) tripsFor(r, off).forEach(t => {
+        const board = boardTime(r, t.ts, boardSid), arr = board + travel * MIN;
+        if (board > now + MIN && arr <= deadline) found.push({ r, t, off, board, arr, travel });
+      });
+    });
+    found.sort((x, y) => y.board - x.board);
+    out.choice = found.find(c => seatMap(c.r, c.t).left > 0) || null;
+    return out;
+  },
+  /* "Reserve and pay": hold a seat on the suggested trip and open the payment step directly. */
+  reserveSuggested() {
+    const sug = this.suggestedTrip(), c = sug && sug.choice;
+    if (!c) { toast('That trip is no longer available', 'Check the suggestion again.', 'danger'); App.refresh(); return; }
+    const { r, t } = c, id = codeFrom(App.s.id + Date.now() + Math.random()); let seat = null;
+    Store.set(d => {
+      cleanupHolds(d); d.bookings = d.bookings.filter(b => !(b.user === App.s.id && b.status === 'held')); // drop any older unpaid hold of mine
+      const sm = seatMap(r, t); for (let n = 1; n <= t.vehicle.cap; n++) if (!sm.sim.has(n) && !sm.real[n]) { seat = n; break; }
+      if (seat) d.bookings.push({ id, user: App.s.id, route: r.id, trip: sm.id, tripTs: t.ts, vehicle: t.vehicle.id, stop: sug.boardSid, seat, status: 'held', holdUntil: Date.now() + HOLD_MIN * MIN, amount: r.fare, at: Date.now() });
+    });
+    if (!seat) { toast('That departure just filled up', 'Check the suggestion again.', 'danger'); App.refresh(); return; }
+    const cl = sug.cl, when = `${fmtDay(sug.ts)}, ${fmtHM(cl.start)}`;
+    App.draft = { route: r.id, stop: sug.boardSid, day: c.off, trip: t.ts, vid: t.vehicle.id, seat, atSeat: true, hold: id, method: (payMethods()[0] || {}).id, suggested: `${cl.code} ${cl.name}, ${when}. Arrives near ${STOPS[sug.destSid].name} about ${fmtTime(c.arr)}.` };
+    vibrate(15); App.go('book');
   },
 };
 const seatsText = (load, cap) => { const f = Math.max(0, cap - load); return f ? `${f} of ${cap} seats free` : 'Full, wait for the next one'; };
@@ -1451,15 +1581,17 @@ function suggestCard() {
   if (!App.s || App.s.role !== 'student') return '';
   const sug = Student.suggestedTrip();
   if (!sug) return '';
-  const { cl, ts, destSid, boardSid, choice } = sug;
-  const today = new Date().toDateString() === new Date(ts).toDateString();
-  const when = `${today ? 'Today' : DOWLABEL[cl.dow]}, ${fmtHM(cl.start)}`;
-  const body = choice
-    ? `<div class="row between" style="margin-top:8px"><span class="small muted">Board at</span><b>${esc(STOPS[boardSid].name)}</b></div>
-       <div class="row between" style="margin-top:4px">${badge(choice.o.r, 'xs')}<b class="num">${fmtTime(choice.depTs)}</b></div>
-       <div class="row between" style="margin-top:4px"><span class="small muted">Gets you near</span><b>${esc(STOPS[destSid].name)}</b></div>
-       <button class="btn primary sm block" style="margin-top:10px" data-act="bookroute" data-r="${choice.o.r.id}">${icon('book')}Reserve this trip</button>`
-    : `<p class="small muted" style="margin-top:8px">No shuttle gets you there in time right now &mdash; check Routes below or leave earlier.</p>`;
+  const { cl, ts, destSid, boardSid, choice } = sug, dest = STOPS[destSid], from = STOPS[boardSid];
+  const when = `${fmtDay(ts)}, ${fmtHM(cl.start)}`, hint = t => `<p class="small muted" style="margin-top:8px">${t}</p>`;
+  let body;
+  if (sug.same) body = hint(`Your boarding stop is already ${esc(dest.short || dest.name)}, where this class is. Tell us where you are leaving from and we will find the shuttle.`) + `<button class="btn ghost sm block" style="margin-top:10px" data-act="nearme">${icon('locate')}Use my location</button>`;
+  else if (choice) body = `<div class="row between" style="margin-top:8px"><span class="small muted">Board at</span><b>${esc(from.name)}</b></div>
+       <div class="row between" style="margin-top:4px">${badge(choice.r, 'xs')}<b class="num">${choice.off ? esc(fmtDay(choice.board)) + ', ' : ''}${fmtTime(choice.board)}</b></div>
+       <div class="row between" style="margin-top:4px"><span class="small muted">Gets you near</span><b>${esc(dest.name)}, about ${fmtTime(choice.arr)}</b></div>
+       <button class="btn primary sm block" style="margin-top:10px" data-act="booksuggested">${icon('ticket')}Reserve and pay</button>
+       <p class="tiny muted center" style="margin-top:6px">We hold a seat for ${HOLD_MIN} minutes while you pay. You can still change the seat or how you pay.</p>`;
+  else if (sug.tooFar) body = hint(`You can book up to ${BOOK_MAX_DAYS} days ahead, so this trip opens closer to the day.`);
+  else body = hint(`No shuttle from ${esc(from.short || from.name)} gets you to ${esc(dest.short || dest.name)} in time for this class. Check Routes below, try another stop, or leave earlier.`);
   return `<section class="card" style="margin:14px 0"><h3 class="sec" style="margin:0 0 2px">${icon('cal')}Suggested for you</h3>
     <p class="small muted" style="margin:2px 0 0">${esc(cl.code)} ${esc(cl.name)} &middot; ${when}${cl.end ? ' to ' + fmtHM(cl.end) : ''} &middot; ${esc(cl.location || 'Location TBC')}</p>
     ${body}</section>`;
@@ -1482,6 +1614,7 @@ SCREENS.home = el => {
     onStop: sid => { Student.setStop(sid); map.setStop(sid); st.mode = 'stop'; st.vid = null; map.setVehicle(null); paint(); toast(`Boarding at ${STOPS[sid].name}`, '', '', 1800); },
   });
   root.insertBefore(map.box, root.firstChild);
+  const lp = Locate.fresh(); if (lp) map.setUser(lp);
   if (st.mode === 'ride') map.rideCam(st.vid, true);
   // Draggable bottom sheet (mobile)
   const grab = $('#grab', el); let sy = null, base = 0, dy = 0;
@@ -1495,7 +1628,7 @@ SCREENS.home = el => {
   const depRow = x => { const s = vehicleStatus(x.v), at = Date.now() + x.m * MIN; return `<button class="dep" data-vid="${x.v.id}">${badge(x.r)}<span class="grow"><b>${esc(x.r.name)}</b><small>${vLabel(x.v)}, ${seatsText(x.load, x.v.cap)}${s.cls === 'warn' || s.cls === 'danger' ? `, <em class="t-${s.cls}">${esc(s.text)}</em>` : ''}</small></span><span class="dep-eta"><b>${esc(etaText(x.m))}</b><small>${isFinite(x.m) ? fmtTime(at) : ''}</small></span></button>`; };
   const stopPanel = () => {
     const sid = Student.stop(), a = Student.departures(sid), s = STOPS[sid];
-    let h = `<button class="stoppick" data-act="pick"><span class="sp-ico">${icon(s.rail ? 'train' : 'pin')}</span><span class="grow"><small>Boarding at</small><b>${esc(s.name)}</b></span><span class="sp-chg">Change</span></button><div id="arr">`;
+    let h = `<button class="stoppick" data-act="pick"><span class="sp-ico">${icon(s.rail ? 'train' : 'pin')}</span><span class="grow"><small>Boarding at</small><b>${esc(s.name)}</b></span><span class="sp-chg">Change</span></button><button class="locbtn sm" data-act="nearme">${icon('locate')}<span class="grow"><b>Find my nearest stop</b></span></button><div id="arr">`;
     if (!a.length) {
       const rs = liveRoutes().filter(r => r.stops.includes(sid));
       h += `<div class="next empty-next">${icon('clock')}<div><b>No departures right now</b><p>${rs.length ? rs.map(r => `Route ${r.id.slice(1)} runs ${RUNS[r.days]}, ${fmtHM(r.first)} to ${fmtHM(r.last)}.`).join(' ') : 'No route serves this stop.'}</p></div></div>`;
@@ -1509,7 +1642,7 @@ SCREENS.home = el => {
       if (a.length > 1) h += `<div class="list deps">${a.slice(1, 7).map(depRow).join('')}</div>`;
     }
     h += `</div>${suggestCard()}<h3 class="sec">Routes</h3><div class="list">${liveRoutes().map(r => { const live = routeVehicles(r.id).filter(v => vState(v).visible).length; return `<button class="lrow" data-rid="${r.id}">${badge(r)}<span class="grow"><b>${esc(r.name)}</b><small>${DAYS[r.days]}, ${fmtHM(r.first)} to ${fmtHM(r.last)}</small></span>${live ? `<span class="chip-s ok">${live} live</span>` : `<span class="chip-s">${runsOn(r, Date.now()) ? 'Not running' : r.days === 'we' ? 'Weekends' : 'Weekdays'}</span>`}${icon('right')}</button>`; }).join('')}</div>
-      <p class="privacy">${icon('eyeoff')}<span>The map shows shuttles, never people. Your location is not collected, and drivers share theirs only while on shift.</span></p>`;
+      <p class="privacy">${icon('eyeoff')}<span>The map shows shuttles, never other people. Nothing tracks you in the background. If you tap Find my nearest stop, your position is used on this phone only and is never saved or sent. Drivers share theirs only while on shift.</span></p>`;
     return h;
   };
   const routePanel = () => {
@@ -1539,7 +1672,12 @@ SCREENS.home = el => {
     if (!st.rideId) return '';
     const b = Store.d.bookings.find(x => x.id === st.rideId), v = b && vehicleById(b.vehicle);
     if (!b || b.status !== 'boarded' || !v || !vState(v).visible) { st.rideId = null; return ''; }
-    return `<div class="list" style="margin-bottom:12px"><button class="lrow" data-act="toride"><span class="lrow-ico">${icon(v.type === 'van' ? 'van' : 'busFront')}</span><span class="grow"><b>Your ride is live</b><small>${esc(v.id)} to ${esc(STOPS[HUB].name)}, tap to track</small></span>${icon('right')}</button></div>`;
+    const info = rideInfo(v);
+    if (info) { // the ride is over once the vehicle is back at the hub, even if tracking was paused
+      if (st.moved == null) st.moved = !info.layover || Date.now() - b.boardedAt > LAYOVER * MIN; if (!info.layover) st.moved = true;
+      if (info.layover && st.moved) { App.rideDone.add(st.rideId); st.rideId = null; return ''; }
+    }
+    return `<div class="resume"><button class="resume-main" data-act="toride"><span class="live-dot"></span><span class="grow"><b>Resume live tracking</b><small>${esc(v.id)} is still heading to ${esc(STOPS[HUB].short || STOPS[HUB].name)}. Tap to follow it again.</small></span>${icon('right')}</button><button class="linkbtn subtle" data-act="endride">I have got off, end this ride</button></div>`;
   };
   const rideP = () => {
     const b = Store.d.bookings.find(x => x.id === st.rideId), v = b && vehicleById(b.vehicle), info = v && rideInfo(v);
@@ -1565,7 +1703,7 @@ SCREENS.home = el => {
       </article>
       <div class="vnext" style="margin-top:14px"><small>${ns.at ? 'At stop now' : 'Next stop'}</small><div class="row between"><b>${esc(STOPS[ns.sid].name)}</b><b class="num">${ns.at ? `Leaves in ${Math.max(1, Math.round(ns.dep))} min` : etaText(ns.min)}</b></div></div>
       <ol class="tl" style="--c:${r.color}">${stopsLeft.map((k, i) => { const mm = stopMin(k); return `<li class="${i === 0 ? 'next' : ''}"><b>${esc(STOPS[r.stops[k]].name)}</b><small>${etaText(mm)}${isFinite(mm) ? `, ${fmtTime(Date.now() + mm * MIN)}` : ''}</small></li>`; }).join('')}<li class="end"><b>${esc(hub.name)}</b><small>${fin ? `${etaText(info.min)}, ${fmtTime(at)}` : 'Stopped'}</small></li></ol>
-      <button class="btn ghost block" data-act="endride" style="margin-top:14px">Stop tracking</button>`;
+      <button class="btn ghost block" data-act="pause" style="margin-top:14px">Stop tracking</button>`;
   };
   const paint = () => { body.innerHTML = st.mode === 'ride' ? rideP() : rideBanner() + (st.mode === 'vehicle' ? vehPanel() : st.mode === 'route' ? routePanel() : stopPanel()); App.badges(); };
   paint();
@@ -1574,11 +1712,15 @@ SCREENS.home = el => {
     if (a.dataset.vid) { st.mode = 'vehicle'; st.vid = a.dataset.vid; map.setVehicle(st.vid); map.panToVehicle(st.vid); paint(); return; }
     if (a.dataset.rid) { st.mode = 'route'; st.rid = a.dataset.rid; map.setFocus(st.rid); paint(); return; }
     const act = a.dataset.act;
-    if (act === 'pick') Student.pickStop(sid => { map.setStop(sid, true); paint(); });
+    const picked = (sid, pos) => { map.setStop(sid, true); if (pos) map.setUser(pos); paint(); };
+    if (act === 'pick') Student.pickStop(picked);
+    if (act === 'nearme') Student.pickStop(picked, { auto: true });
+    if (act === 'booksuggested') Student.reserveSuggested();
     if (act === 'back') { if (st.mode === 'vehicle' && st.rid) { st.mode = 'route'; } else { st.mode = 'stop'; st.rid = null; map.setFocus(null); } st.vid = null; map.setVehicle(null); paint(); }
     if (act === 'bookroute') { App.draft = { route: a.dataset.r, stop: Student.stop() }; App.go('book'); }
     if (act === 'recenter') { if (st.mode === 'ride') map.rideCam(st.vid); else { map.setVehicle(st.vid); map.panToVehicle(st.vid); } paint(); }
     if (act === 'toride') { const b = Store.d.bookings.find(x => x.id === st.rideId); if (b) { st.mode = 'ride'; st.vid = b.vehicle; st.rid = null; map.rideCam(st.vid); paint(); } }
+    if (act === 'pause') { st.mode = 'stop'; st.vid = null; map.setVehicle(null); map.setFocus(null); paint(); toast('Tracking paused', 'Tap Resume live tracking to follow your ride again.', '', 3400); }
     if (act === 'endride') { endRide(); paint(); }
   });
   return {
@@ -1587,6 +1729,18 @@ SCREENS.home = el => {
     destroy() { map.destroy(); },
   };
 };
+
+function nearBlock(D) {
+  const n = D.near; let card = '';
+  if (n) {
+    const s = STOPS[n.sid], r = n.rid && routeById(n.rid), v = n.vid && vehicleById(n.vid), sk = n.skip && STOPS[n.skip.id];
+    card = `<div class="nearcard"><small>Closest stop to you</small><b>${esc(s.name)}</b><span class="small muted">${esc(Locate.near(n.km))}</span>
+      ${sk ? `<p class="small muted" style="margin:6px 0 0">${esc(sk.short || sk.name)} is closer (${esc(Locate.dist(n.skip.km))}) but has no open departures in the next ${BOOK_MAX_DAYS} days.</p>` : ''}
+      ${n.ts && r ? `<div class="row" style="gap:8px;margin-top:10px">${badge(r, 'xs')}<b class="small">${esc(r.name)}</b></div><div class="row between" style="margin-top:4px"><span class="small muted">Next departure</span><b class="small">${esc(fmtDay(n.board))}, ${fmtTime(n.board)}${v ? `, ${esc(vLabel(v))}` : ''}</b></div><button class="btn primary sm block" style="margin-top:10px" data-act="usenear">Use this stop and departure</button>` : `<p class="small muted" style="margin:8px 0 0">No open departures from here right now.</p>`}
+      ${n.km > 5 ? `<p class="small" style="color:var(--warn);margin:8px 0 0">You are far from the shuttle network, so check this is where you want to board.</p>` : ''}</div>`;
+  }
+  return `<section class="blk"><button class="locbtn" data-act="locate" style="margin-bottom:${n ? 10 : 0}px">${icon('locate')}<span class="grow"><b>${n ? 'Update my location' : 'Use my current location'}</b><small>Finds the closest stop and its next shuttle. Used on this device only, never saved.</small></span></button>${card}</section>`;
+}
 
 /* ---------- Book (UC-06, UC-07) ---------- */
 SCREENS.book = el => {
@@ -1602,12 +1756,14 @@ SCREENS.book = el => {
     if (!D.route || !routes.some(r => r.id === D.route)) D.route = routes[0]?.id;
     const r = routeById(D.route);
     if (r && (!D.stop || !r.stops.includes(D.stop))) D.stop = r.stops.includes(Student.stop()) ? Student.stop() : r.stops[0];
+    const lp = Locate.fresh();
     const days = Array.from({ length: BOOK_MAX_DAYS + 1 }, (_, i) => ({ i, t: startOfDay(Date.now()) + i * DAY + 12 * 3600e3 }));
     if (r && (D.day == null || !runsOn(r, days[D.day].t) || !tripsFor(r, D.day).some(t => boardTime(r, t.ts, D.stop) > Date.now()))) { const f = days.find(d => tripsFor(r, d.i).some(t => boardTime(r, t.ts, D.stop) > Date.now())); D.day = f ? f.i : 0; D.trip = null; }
     let trips = []; if (r) trips = tripsFor(r, D.day).map(t => ({ ...t, board: boardTime(r, t.ts, D.stop) })).filter(t => t.board > Date.now()).slice(0, 36);
     el.innerHTML = head + `<div class="content book">${stepper}
+      ${nearBlock(D)}
       <section class="blk"><h3>Route</h3><div class="route-pick">${routes.map(x => `<button class="rcard" style="--c:${x.color}" data-route="${x.id}" aria-pressed="${x.id === D.route}">${badge(x)}<span class="grow"><b>${esc(x.name)}</b><small>${DAYS[x.days]}, every ${sched(x).h} min</small></span><span class="fare">${fmtRM(x.fare)}</span></button>`).join('')}</div></section>
-      ${r ? `<section class="blk"><h3>Boarding at</h3><div class="chips">${r.stops.map(s => `<button class="chip" data-stop="${s}" aria-pressed="${s === D.stop}">${esc(STOPS[s].name)}</button>`).join('')}</div></section>
+      ${r ? `<section class="blk"><h3>Boarding at</h3><div class="chips">${r.stops.map(s => `<button class="chip" data-stop="${s}" aria-pressed="${s === D.stop}">${esc(STOPS[s].name)}${lp ? ` <span class="chipd">${Locate.dist(hav(lp, STOPS[s]))}</span>` : ''}</button>`).join('')}</div></section>
       <section class="blk"><h3>Date</h3><div class="days" role="group" aria-label="Date">${days.map(d => { const ok = runsOn(r, d.t), dt = new Date(d.t); return `<button class="day" data-day="${d.i}" aria-pressed="${D.day === d.i}" ${ok ? '' : 'disabled'}><small>${d.i === 0 ? 'Today' : d.i === 1 ? 'Tmrw' : dt.toLocaleDateString('en-MY', { weekday: 'short' })}</small><b>${dt.getDate()}</b><small>${ok ? dt.toLocaleDateString('en-MY', { month: 'short' }) : 'No service'}</small></button>`; }).join('')}</div></section>
       <section class="blk"><h3>Departure</h3>${trips.length ? `<div class="trip-grid">${trips.map(t => { const sm = seatMap(r, t), full = sm.left <= 0; return `<button class="trip" data-trip="${t.ts}" data-vid="${t.vehicle.id}" ${full ? 'disabled' : ''} aria-pressed="${D.trip === t.ts}"><b>${fmtTime(t.board)}</b><small>${full ? 'Fully booked' : `${sm.left} seats, ${t.vehicle.type}`}</small></button>`; }).join('')}</div>`
         : emptyState('cal', 'No more departures on this date', 'Pick another date or route.')}
@@ -1619,6 +1775,11 @@ SCREENS.book = el => {
       else if (b.dataset.stop) { D.stop = b.dataset.stop; D.trip = null; App.refresh(); }
       else if (b.dataset.day != null) { D.day = +b.dataset.day; D.trip = null; App.refresh(); }
       else if (b.dataset.trip) { D.trip = +b.dataset.trip; D.vid = b.dataset.vid; $$('.trip', el).forEach(x => x.setAttribute('aria-pressed', x === b)); const bar = $('.cta-bar', el); bar.querySelector('.grow').innerHTML = `<b>${fmtTime(boardTime(r, D.trip, D.stop))}</b><small>${fmtDay(D.trip)} from ${esc(STOPS[D.stop].name)}</small>`; bar.querySelector('button').disabled = false; bar.classList.remove('pop'); bar.offsetWidth; bar.classList.add('pop'); }
+      else if (b.dataset.act === 'locate') {
+        b.disabled = true; $('small', b).textContent = 'Finding you...';
+        Locate.get().then(pos => { D.near = Student.nearestFor(pos, routes); if (App.tab === 'book') App.refresh(); }).catch(err => { toast('Could not find your location', Locate.err(err), 'danger', 5600); if (App.tab === 'book') App.refresh(); });
+      }
+      else if (b.dataset.act === 'usenear' && D.near) { const n = D.near; D.route = n.rid; D.stop = n.sid; D.day = n.off; D.trip = n.ts; D.vid = n.vid; toast('Stop and departure selected', 'Tap Choose a seat to continue.', 'ok', 2600); App.refresh(); }
       else if (b.dataset.act === 'toseat') { D.seat = null; D.atSeat = true; App.refresh(); window.scrollTo(0, 0); }
     };
     return {};
@@ -1649,19 +1810,23 @@ SCREENS.book = el => {
   }
 
   if (step === 3) {
-    const b = Store.d.bookings.find(x => x.id === D.hold), r = routeById(b.route), board = boardTime(r, b.tripTs, b.stop), m = D.method || 'qr';
+    const b = Store.d.bookings.find(x => x.id === D.hold), r = routeById(b.route), board = boardTime(r, b.tripTs, b.stop), ms = payMethods();
+    if (!ms.some(x => x.id === D.method)) D.method = ms[0] && ms[0].id;
+    const m = D.method, mi = payInfo(m);
     el.innerHTML = head + `<div class="content book">${stepper}
+      ${D.suggested ? `<div class="sugbar">${icon('cal')}<span><b>Suggested for your class</b><small>${esc(D.suggested)}</small></span></div>` : ''}
       <div class="holdbar"><svg class="ring" viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="15"/><circle class="ring-v" id="ringv" cx="18" cy="18" r="15"/></svg><span>Seat ${b.seat} is held for <b class="num" id="hold">5:00</b></span></div>
       <div class="paygrid"><section class="summary"><div class="row" style="margin-bottom:10px">${badge(r)}<b>${esc(r.name)}</b></div>
-        <dl><div><dt>Boarding at</dt><dd>${esc(STOPS[b.stop].name)}</dd></div><div><dt>Departs</dt><dd>${fmtDay(board)}, ${fmtTime(board)}</dd></div><div><dt>Vehicle</dt><dd>${esc(b.vehicle)}</dd></div><div><dt>Seat</dt><dd>${b.seat}</dd></div><div class="total"><dt>Total</dt><dd class="num">${fmtRM(b.amount)}</dd></div></dl></section>
-      <section><h3 style="margin-bottom:10px">Pay with</h3><div class="paylist" role="radiogroup" aria-label="Payment method">${Object.entries(PAY).map(([k, p]) => `<button class="payopt" role="radio" data-m="${k}" aria-pressed="${k === m}" aria-checked="${k === m}"><span class="pico">${icon(p.icon)}</span><span class="grow"><b>${p.label}</b><small>${p.sub}</small></span><span class="radio"></span></button>`).join('')}</div>
-      ${m === 'card' ? `<div class="cardform stack"><label class="field"><span>Card number</span><input class="input num" id="cn" inputmode="numeric" autocomplete="cc-number" placeholder="1234 5678 9012 3456" maxlength="23" value="${esc(D.cn || '')}"></label><div class="row"><label class="field grow"><span>Expiry</span><input class="input num" id="ce" placeholder="MM/YY" maxlength="5" autocomplete="cc-exp" value="${esc(D.ce || '')}"></label><label class="field grow"><span>CVC</span><input class="input num" id="cc" placeholder="123" maxlength="4" inputmode="numeric" autocomplete="cc-csc"></label></div><p id="cerr" class="errtxt" hidden></p></div>` : ''}</section></div>
+        <dl><div><dt>Boarding at</dt><dd>${esc(STOPS[b.stop].name)}</dd></div><div><dt>Departs</dt><dd>${fmtDay(board)}, ${fmtTime(board)}</dd></div><div><dt>Vehicle</dt><dd>${esc(b.vehicle)}</dd></div><div><dt>Seat</dt><dd>${b.seat} <button class="linkbtn inl" data-act="reseat">Change</button></dd></div><div class="total"><dt>Total</dt><dd class="num">${fmtRM(b.amount)}</dd></div></dl></section>
+      <section><h3 style="margin-bottom:10px">Pay with</h3><div class="paylist" role="radiogroup" aria-label="Payment method">${ms.map(p => { const k = p.id; return `<button class="payopt" role="radio" data-m="${k}" aria-pressed="${k === m}" aria-checked="${k === m}"><span class="pico">${icon(p.icon)}</span><span class="grow"><b>${p.label}</b><small>${p.sub}</small></span><span class="radio"></span></button>`; }).join('')}</div>
+      ${mi.kind === 'card' ? `<div class="cardform stack"><label class="field"><span>Card number</span><input class="input num" id="cn" inputmode="numeric" autocomplete="cc-number" placeholder="1234 5678 9012 3456" maxlength="23" value="${esc(D.cn || '')}"></label><div class="row"><label class="field grow"><span>Expiry</span><input class="input num" id="ce" placeholder="MM/YY" maxlength="5" autocomplete="cc-exp" value="${esc(D.ce || '')}"></label><label class="field grow"><span>CVC</span><input class="input num" id="cc" placeholder="123" maxlength="4" inputmode="numeric" autocomplete="cc-csc"></label></div><p id="cerr" class="errtxt" hidden></p></div>` : ''}</section></div>
       <div class="cta-bar"><button class="btn ghost" data-act="release">Release seat</button><button class="btn primary grow" data-act="pay">${m === 'cash' ? 'Reserve and pay on board' : `Pay ${fmtRM(b.amount)}`}</button></div></div>`;
     const tickHold = () => { const x = Store.d.bookings.find(y => y.id === D.hold), h = $('#hold', el); if (!x || !h) return; const left = Math.max(0, x.holdUntil - Date.now()); h.textContent = `${Math.floor(left / 60000)}:${pad(Math.floor(left / 1000) % 60)}`; const rv = $('#ringv', el); if (rv) rv.style.strokeDashoffset = (94.25 * (1 - left / (HOLD_MIN * MIN))).toFixed(2); if (left <= 0 && !D.paying) { Store.set(d => cleanupHolds(d)); D.hold = null; D.seat = null; toast('Seat hold expired', 'The seat went back to other riders. Pick a seat again.', 'danger'); App.refresh(); } };
     tickHold();
     el.onclick = e => {
       const t = e.target.closest('button'); if (!t) return;
       if (t.dataset.m) { const ci = $('#cn', el); if (ci) { D.cn = ci.value; D.ce = $('#ce', el).value; } D.method = t.dataset.m; App.refresh(); }
+      if (t.dataset.act === 'reseat') { Store.set(d => { d.bookings = d.bookings.filter(x => x.id !== D.hold); }); D.hold = null; D.seat = null; D.atSeat = true; App.refresh(); window.scrollTo(0, 0); }
       if (t.dataset.act === 'release') { Store.set(d => { d.bookings = d.bookings.filter(x => x.id !== D.hold); }); D.hold = null; D.seat = null; toast('Seat released'); App.refresh(); }
       if (t.dataset.act === 'pay') Pay.run(el);
     };
@@ -1679,8 +1844,9 @@ SCREENS.book = el => {
 const Pay = {
   async run(el) {
     const D = App.draft, b = Store.d.bookings.find(x => x.id === D.hold); if (!b) return;
-    const m = D.method || 'qr'; let decline = false;
-    if (m === 'card') {
+    const m = D.method || 'qr', mi = payInfo(m); let decline = false;
+    if (!payOn(m)) { toast('That payment option was just turned off', 'Please choose another way to pay.', 'danger'); D.method = null; App.refresh(); return; }
+    if (mi.kind === 'card') {
       const cn = ($('#cn', el).value || '').replace(/\s/g, ''), ce = $('#ce', el).value, cc = $('#cc', el).value, err = $('#cerr', el); D.cn = $('#cn', el).value; D.ce = ce;
       const bad = !/^\d{15,16}$/.test(cn) ? 'Enter a 15 or 16 digit card number.' : !/^(0[1-9]|1[0-2])\/\d{2}$/.test(ce) ? 'Enter the expiry date as MM/YY.' : !/^\d{3,4}$/.test(cc) ? 'Enter the 3 or 4 digit security code.' : '';
       if (bad) { err.hidden = false; err.textContent = bad; return; }
@@ -1688,10 +1854,10 @@ const Pay = {
     }
     if (m === 'cash') { this.finish(b, 'cash'); return; }
     D.paying = true; const r = routeById(b.route);
-    const stage = { qr: `<div class="qrbox sm" id="payqr"></div><p class="gw-msg"><span class="spin"></span>Waiting for your bank to confirm</p>`, nfc: `<div class="pulse">${icon('nfc')}</div><p class="gw-msg"><span class="spin"></span>Hold your phone near the reader</p>`, transit: `<div class="pulse">${icon('wallet')}</div><p class="gw-msg"><span class="spin"></span>Charging card ending 4412</p>`, card: `<div class="pulse">${icon('card')}</div><p class="gw-msg"><span class="spin"></span>Authorising card ending ${esc((D.cn || '').replace(/\s/g, '').slice(-4))}</p>` }[m];
+    const stage = { wallet: `<div class="pulse">${icon(mi.icon)}</div><p class="gw-msg"><span class="spin"></span>${esc(mi.msg || 'Approve the payment in the ' + mi.label + ' app')}</p>`, qr: `<div class="qrbox sm" id="payqr"></div><p class="gw-msg"><span class="spin"></span>Waiting for your bank to confirm</p>`, nfc: `<div class="pulse">${icon('nfc')}</div><p class="gw-msg"><span class="spin"></span>Hold your phone near the reader</p>`, transit: `<div class="pulse">${icon('wallet')}</div><p class="gw-msg"><span class="spin"></span>Charging card ending 4412</p>`, card: `<div class="pulse">${icon('card')}</div><p class="gw-msg"><span class="spin"></span>Authorising card ending ${esc((D.cn || '').replace(/\s/g, '').slice(-4))}</p>` }[mi.kind] || '';
     const dlg = openDialog({ label: 'Payment', closable: false, html: `<div class="gateway" id="gw"><span class="gw-brand">${icon('lock')}Secure payment</span><h2 class="num">${fmtRM(b.amount)}</h2><p class="small muted">Route ${r.id.slice(1)}, seat ${b.seat}</p>${stage}</div>` });
-    if (m === 'qr') renderQR($('#payqr', dlg.el), `00020101021226DUITNOW|KLUST|${b.id}|${b.amount.toFixed(2)}`);
-    const t0 = performance.now(); await sleep(m === 'qr' ? 1600 + Math.random() * 600 : 900 + Math.random() * 1000);
+    if (mi.kind === 'qr') renderQR($('#payqr', dlg.el), `00020101021226DUITNOW|KLUST|${b.id}|${b.amount.toFixed(2)}`);
+    const t0 = performance.now(); await sleep(mi.kind === 'qr' ? 1600 + Math.random() * 600 : 900 + Math.random() * 1000);
     const ms = performance.now() - t0, gw = $('#gw', dlg.el); if (!gw) { D.paying = false; return; }
     if (decline) {
       Store.set(d => { d.bookings = d.bookings.filter(x => x.id !== b.id); addLog(d, 'pay', `Payment declined, seat ${b.seat} on Route ${r.id.slice(1)} released`); });
@@ -1705,7 +1871,7 @@ const Pay = {
   },
   finish(b, m) {
     const D = App.draft, r = routeById(b.route);
-    Store.set(d => { const x = d.bookings.find(y => y.id === b.id); if (!x) return; x.status = 'booked'; delete x.holdUntil; x.pay = m; x.paid = m !== 'cash'; x.txn = m === 'cash' ? null : 'TXN-' + hashStr(x.id + Date.now()).toString(36).toUpperCase(); x.at = Date.now(); addLog(d, 'booking', `Seat ${x.seat} booked on Route ${r.id.slice(1)} (${PAY[m].label})`); notify(d, { user: App.s.id }, 'ok', 'Seat reserved', `Route ${r.id.slice(1)}, seat ${x.seat}, ${fmtDay(x.tripTs)} at ${fmtTime(boardTime(r, x.tripTs, x.stop))} from ${STOPS[x.stop].name}.`); });
+    Store.set(d => { const x = d.bookings.find(y => y.id === b.id); if (!x) return; x.status = 'booked'; delete x.holdUntil; x.pay = m; x.paid = m !== 'cash'; x.txn = m === 'cash' ? null : 'TXN-' + hashStr(x.id + Date.now()).toString(36).toUpperCase(); x.at = Date.now(); x.payLabel = payInfo(m).label; addLog(d, 'booking', `Seat ${x.seat} booked on Route ${r.id.slice(1)} (${x.payLabel})`); notify(d, { user: App.s.id }, 'ok', 'Seat reserved', `Route ${r.id.slice(1)}, seat ${x.seat}, ${fmtDay(x.tripTs)} at ${fmtTime(boardTime(r, x.tripTs, x.stop))} from ${STOPS[x.stop].name}.`); });
     App.seen.add(Store.d.notifs[0].id); D.done = b.id; D.hold = null; D.paying = false; App.refresh(); window.scrollTo(0, 0);
   },
 };
@@ -1752,7 +1918,7 @@ function openTicket(id, after) {
       renderQR($('.qrbox', body), 'KLUST:' + b.id);
       const c = $('[data-act="cancel"]', body); if (c) c.onclick = async () => {
         close(); const r = routeById(b.route);
-        const ok = await confirmDialog({ title: 'Cancel this booking?', body: `Seat ${b.seat} on the ${fmtTime(bt)} Route ${r.id.slice(1)} departure will be released. ${b.paid ? `${fmtRM(b.amount)} will be refunded to your ${PAY[b.pay].label} within 3 working days.` : 'Nothing was charged.'}`, ok: 'Cancel booking', danger: true });
+        const ok = await confirmDialog({ title: 'Cancel this booking?', body: `Seat ${b.seat} on the ${fmtTime(bt)} Route ${r.id.slice(1)} departure will be released. ${b.paid ? `${fmtRM(b.amount)} will be refunded to your ${esc(payName(b))} within 3 working days.` : 'Nothing was charged.'}`, ok: 'Cancel booking', danger: true });
         if (!ok) return;
         if ((boardTimeOf(b) - Date.now()) / MIN < CANCEL_CUTOFF) { toast('Too late to cancel', 'Cancellation closes 45 minutes before boarding.', 'danger'); return; }
         Store.set(d => { const x = d.bookings.find(y => y.id === b.id); x.status = 'cancelled'; x.refund = !!x.paid; x.cancelledAt = Date.now(); addLog(d, 'cancel', `Booking ${x.id} on Route ${r.id.slice(1)} cancelled${x.paid ? ', refund issued' : ''}`); });
@@ -1786,7 +1952,7 @@ SCREENS.account = el => {
       rows = `<button class="lrow" data-act="stop"><span class="lrow-ico">${icon('pin')}</span><span class="grow"><b>My stop</b><small>${esc(STOPS[Student.stop()].name)}</small></span>${icon('right')}</button>
         ${u.timetable && u.timetable.length ? `<button class="lrow" data-act="timetable"><span class="lrow-ico">${icon('cal')}</span><span class="grow"><b>My timetable</b><small>${u.timetable.length} classes this week, from LMS</small></span>${icon('right')}</button>` : ''}
         ${appearanceRow}`;
-      extra = `<section class="card"><h3 style="margin-bottom:10px">Your privacy</h3><ul class="plist"><li>${icon('eyeoff')}<span>We track shuttles, not phones. Your location is never collected, before or after you board.</span></li><li>${icon('shield')}<span>When a driver checks your ticket or student ID, they only see whether you can ride. Your records stay private.</span></li><li>${icon('cash')}<span>No phone or data? Show your student ID and pay cash on board on any route.</span></li></ul></section>`;
+      extra = `<section class="card"><h3 style="margin-bottom:10px">Your privacy</h3><ul class="plist"><li>${icon('eyeoff')}<span>We track shuttles, not phones. Your location is only read when you tap Use my location, to find the closest stop. It stays on your device and is never saved or sent.</span></li><li>${icon('shield')}<span>When a driver checks your ticket or student ID, they only see whether you can ride. Your records stay private.</span></li>${payOn('cash') ? `<li>${icon('cash')}<span>No phone or data? Show your student ID and pay cash on board on any route.</span></li>` : ''}</ul></section>`;
     } else if (role === 'driver') {
       const d = Driver.me(), v = Driver.veh(), r = v && routeById(v.route);
       idBlock = `<div class="idcard"><div class="id-top">${logo()}<span class="chip-s ${v ? 'ok' : ''}">${icon('bus')}${v ? 'On shift' : 'No vehicle'}</span></div><h2>${esc(d ? d.name : 'Driver')}</h2><p class="num">${esc(App.s.id)}</p><p class="small">${v ? `${esc(v.id)}, ${esc(v.plate)}${r ? `, Route ${r.id.slice(1)}` : ''}` : 'No vehicle selected'}</p></div>`;
@@ -2047,7 +2213,7 @@ SCREENS.overview = el => {
     $('#act', el).innerHTML = Store.d.log.length ? `<ul class="activity">${Store.d.log.slice(0, 8).map(l => `<li><span class="adot k-${l.kind}"></span><span class="grow">${esc(l.text)}</span><small>${ago(l.at)}</small></li>`).join('')}</ul>` : '<p class="muted small">No activity yet.</p>';
   };
   paint();
-  el.onclick = e => { const i = e.target.closest('[data-inc]'); if (i) incidentDialog(i.dataset.inc); const v = e.target.closest('[data-veh]'); if (v) vehicleDialog(v.dataset.veh); if (e.target.closest('[data-act="csv"]')) { downloadCSV(`klust-bookings-${isoDate(Date.now())}.csv`, [['Ticket', 'Student ID', 'Route', 'Departure', 'Stop', 'Seat', 'Vehicle', 'Status', 'Payment', 'Amount (RM)'], ...Store.d.bookings.filter(b => b.status !== 'held').map(b => [b.id, b.user, b.route, new Date(b.tripTs).toLocaleString('en-MY'), STOPS[b.stop]?.name, b.seat, b.vehicle, b.status, b.pay ? PAY[b.pay].label : '', b.amount.toFixed(2)])]); toast('Bookings exported', 'CSV file downloaded.', 'ok'); } };
+  el.onclick = e => { const i = e.target.closest('[data-inc]'); if (i) incidentDialog(i.dataset.inc); const v = e.target.closest('[data-veh]'); if (v) vehicleDialog(v.dataset.veh); if (e.target.closest('[data-act="csv"]')) { downloadCSV(`klust-bookings-${isoDate(Date.now())}.csv`, [['Ticket', 'Student ID', 'Route', 'Departure', 'Stop', 'Seat', 'Vehicle', 'Status', 'Payment', 'Amount (RM)'], ...Store.d.bookings.filter(b => b.status !== 'held').map(b => [b.id, b.user, b.route, new Date(b.tripTs).toLocaleString('en-MY'), STOPS[b.stop]?.name, b.seat, b.vehicle, b.status, b.pay ? payName(b) : '', b.amount.toFixed(2)])]); toast('Bookings exported', 'CSV file downloaded.', 'ok'); } };
   return { live: paint, onStore: paint, destroy() { map.destroy(); } };
 };
 function vehicleDialog(id) {
@@ -2166,6 +2332,62 @@ SCREENS.fleet = el => {
     if (t.dataset.status) { const v = t.dataset.status; Store.set(d => { d.vehicles.find(y => y.id === v).status = t.value; addLog(d, 'fleet', `${v} set to ${t.options[t.selectedIndex].text.toLowerCase()}`); }); paint(); } };
   el.onclick = e => { const s = e.target.closest('[data-set]'); if (s) { Store.set(d => { d.settings[s.dataset.set] = !d.settings[s.dataset.set]; }); paint(); } };
   return { onStore() { if (!App.busy()) paint(); }, live() { if (!App.busy()) $$('tbody tr', el).forEach((tr, i) => { const v = Store.d.vehicles[i]; if (!v) return; const s = vehicleStatus(v), vis = vState(v).visible; tr.lastElementChild.innerHTML = `<span class="chip-s ${s.cls}">${esc(s.text)}</span>${vis ? `<small class="block muted">${onboard(v)} of ${v.cap} on board</small>` : ''}`; }); } };
+};
+
+
+/* ---------- Payments (admin): choose which checkout options students see ---------- */
+function addPayDialog(after) {
+  const have = new Set(Store.d.payMethods.map(m => m.id)), presets = Object.entries({ ...PAY, ...PAY_MORE }).filter(([id]) => !have.has(id));
+  openDialog({ title: 'Add a payment option', html: `${presets.length ? `<h4 class="grp" style="margin-top:0">Ready to use</h4><div class="list">${presets.map(([id, p]) => `<button class="lrow" data-preset="${id}"><span class="lrow-ico">${icon(p.icon)}</span><span class="grow"><b>${esc(p.label)}</b><small>${esc(p.sub)}</small></span>${icon('plus')}</button>`).join('')}</div>` : ''}
+      <h4 class="grp">Or create your own</h4>
+      <form class="stack" id="cpf" novalidate><label class="field"><span>Name</span><input class="input" id="cpn" maxlength="28" placeholder="e.g. Maybank QRPay" autocomplete="off"></label><label class="field"><span>Short description (optional)</span><input class="input" id="cps" maxlength="60" placeholder="Shown under the name at checkout" autocomplete="off"></label><p class="errtxt" id="cpe" hidden></p><button class="btn primary block" type="submit">${icon('plus')}Add option</button></form>
+      <p class="tiny muted" style="margin-top:10px">Your own options are paid online. Only Cash on board is collected by the driver.</p>`,
+    onMount: (b, close) => {
+      const add = m => { Store.set(d => { d.payMethods.push({ ...m, on: true }); addLog(d, 'pay', `${m.label} added as a payment option`); }); toast(`${m.label} added`, 'Students can use it at checkout now.', 'ok'); close(); after && after(); };
+      b.addEventListener('click', e => { const p = e.target.closest('[data-preset]'); if (!p) return; const id = p.dataset.preset, c = PAY[id] || PAY_MORE[id]; add({ id, label: c.label, sub: c.sub, icon: c.icon, kind: c.kind, ...(c.msg ? { msg: c.msg } : {}) }); });
+      $('#cpf', b).onsubmit = e => {
+        e.preventDefault(); const name = $('#cpn', b).value.trim().replace(/\s+/g, ' '), sub = $('#cps', b).value.trim(), err = $('#cpe', b);
+        const bad = !name ? 'Give the option a name.' : Store.d.payMethods.some(m => m.label.toLowerCase() === name.toLowerCase()) ? 'There is already an option with that name.' : '';
+        if (bad) { err.hidden = false; err.textContent = bad; return; }
+        add({ id: 'x' + hashStr(name + Date.now()).toString(36), label: name, sub: sub || 'Pay online', icon: 'wallet', kind: 'wallet', custom: true });
+      };
+    } });
+}
+SCREENS.payments = el => {
+  const stats = () => { const o = {}; Store.d.bookings.forEach(b => { if (!b.pay || (b.status !== 'booked' && b.status !== 'boarded')) return; const x = o[b.pay] || (o[b.pay] = { n: 0, paid: 0, due: 0 }); x.n++; if (b.paid) x.paid += b.amount; else x.due += b.amount; }); return o; };
+  const paint = () => {
+    const all = Store.d.payMethods, on = all.filter(m => m.on), st = stats(), sum = k => Object.values(st).reduce((a, x) => a + x[k], 0), n = Object.values(st).reduce((a, x) => a + x.n, 0);
+    el.innerHTML = header('Payments', `${on.length} of ${all.length} options open to students`, `<button class="btn sm primary" data-act="add">${icon('plus')}Add option</button>`) + `<div class="content narrow stack-l">
+      <div class="stats3"><div><b class="num">${on.length}</b><small>Options on</small></div><div><b class="num">${fmtRM(sum('paid')).replace('RM ', '')}</b><small>Collected (RM)</small></div><div><b class="num">${fmtRM(sum('due')).replace('RM ', '')}</b><small>Cash still due (RM)</small></div></div>
+      <section class="card"><h3 style="margin-bottom:2px">Checkout options</h3><p class="small muted" style="margin:0 0 6px">Switch an option off to hide it from students. Remove it to take it out of the list. Order here is the order students see.</p>
+        ${all.length ? all.map((m, i) => { const x = st[m.id]; return `<div class="pmrow ${m.on ? '' : 'off'}"><div class="pm-main"><span class="lrow-ico">${icon(m.icon)}</span><span class="grow"><b>${esc(m.label)}</b><small>${esc(m.sub)}</small></span><button class="switch" role="switch" aria-checked="${m.on}" data-tog="${m.id}" aria-label="Show ${esc(m.label)} to students"><i></i></button></div>
+          <div class="pm-foot"><span class="grow">${m.on ? '' : '<span class="chip-s">Hidden from students</span> '}${x ? `${x.n} booking${x.n === 1 ? '' : 's'}, ${fmtRM(x.paid)} collected${x.due ? `, ${fmtRM(x.due)} due` : ''}` : 'No bookings yet'}</span>
+            <button class="iconbtn sm" data-up="${m.id}" aria-label="Move ${esc(m.label)} up" ${i === 0 ? 'disabled' : ''}>${icon('up')}</button><button class="iconbtn sm" data-down="${m.id}" aria-label="Move ${esc(m.label)} down" ${i === all.length - 1 ? 'disabled' : ''}>${icon('down')}</button><button class="iconbtn sm t-danger-i" data-del="${m.id}" aria-label="Remove ${esc(m.label)}">${icon('trash')}</button></div></div>`; }).join('') : emptyState('wallet', 'No payment options', 'Add one so students can pay.')}
+      </section>
+      <p class="privacy">${icon('info')}<span>Bookings that were already paid keep the option they used, even if you remove it later. ${n} active booking${n === 1 ? '' : 's'} so far.</span></p></div>`;
+  };
+  paint();
+  el.onclick = async e => {
+    const t = e.target.closest('button'); if (!t) return; const all = Store.d.payMethods, on = all.filter(m => m.on);
+    if (t.dataset.act === 'add') { addPayDialog(paint); return; }
+    if (t.dataset.tog) {
+      const m = all.find(x => x.id === t.dataset.tog); if (!m) return;
+      if (m.on && on.length === 1) { toast('Keep at least one option on', 'Students need a way to pay.', 'danger'); return; }
+      Store.set(d => { const x = d.payMethods.find(y => y.id === m.id); x.on = !x.on; addLog(d, 'pay', `${x.label} ${x.on ? 'turned on' : 'turned off'} for students`); });
+      toast(`${m.label} ${m.on ? 'is now hidden' : 'is now available'}`, '', 'ok', 2200); paint(); return;
+    }
+    if (t.dataset.up || t.dataset.down) { const id = t.dataset.up || t.dataset.down, i = all.findIndex(x => x.id === id), j = t.dataset.up ? i - 1 : i + 1; if (i < 0 || j < 0 || j >= all.length) return; Store.set(d => { const a = d.payMethods; [a[i], a[j]] = [a[j], a[i]]; }); paint(); return; }
+    if (t.dataset.del) {
+      const m = all.find(x => x.id === t.dataset.del); if (!m) return;
+      if (m.on && on.length === 1) { toast('Keep at least one option on', 'Turn another one on first, then remove this one.', 'danger'); return; }
+      const open = Store.d.bookings.filter(b => b.pay === m.id && b.status === 'booked' && !b.paid).length;
+      const ok = await confirmDialog({ title: `Remove ${esc(m.label)}?`, body: `It will disappear from checkout. Bookings already made with it are not affected${open ? `, and drivers can still collect on the ${open} seat${open === 1 ? '' : 's'} reserved with it` : ''}. You can add it back later.`, ok: 'Remove', danger: true });
+      if (!ok) return;
+      Store.set(d => { d.payMethods = d.payMethods.filter(x => x.id !== m.id); addLog(d, 'pay', `${m.label} removed from payment options`); });
+      toast(`${m.label} removed`, '', 'ok', 2400); paint();
+    }
+  };
+  return { onStore() { if (!$('.scrim')) paint(); } };
 };
 
 /* ---------- Insights: demand model + recommendations (FR14, fairness) ---------- */

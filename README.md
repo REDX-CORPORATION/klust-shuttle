@@ -63,3 +63,31 @@ grid's own header row (`08:00 AM`, `08:30 AM`, ...), not assumed. If the width
 were misread, every class after the first of the day would show too early.
 After deploying, **sign out and sign in again** so the app re-pulls the timetable
 (it is stored on the device from the last sign-in).
+
+---
+
+## What's new in this version
+
+**1. Closest stop from your current location** (student)
+- *Home*: tap **Find my nearest stop**. Also available as **Use my current location** inside the stop picker (Home, Account → My stop) and at the top of **Book**.
+- Stops are sorted nearest-first with distance and walking time, the closest one is suggested with its next shuttle, and a blue "you are here" dot appears on the map.
+- On Book it also picks the soonest bookable departure from that stop; **Use this stop and departure** fills in the route, stop and time.
+- Privacy: location is read only when the button is tapped, kept in memory only (never written to storage, never sent anywhere). Needs HTTPS (Vercel is fine) and the browser's permission; denied/timeout/unsupported cases show a friendly message and the manual list still works.
+
+**2. Suggested trip goes straight to payment**
+- *Suggested for you* (from the LMS timetable) now finds the **latest shuttle that still reaches class** (8 min walk + 4 min buffer), built from the real bookable timetable.
+- **Reserve and pay** holds a seat automatically and opens the **Payment** step directly (a 5-minute hold, same as the normal flow). **Change** next to the seat returns to seat selection.
+- If the boarding stop equals the class stop, the card asks for your starting point and offers *Use my location*.
+
+**3. Payment options managed by admin** (Admin → **Payments**)
+- Switch any option on/off, remove it, add it back, add ready-made ones (Touch 'n Go eWallet, Boost, GrabPay, ShopeePay, FPX) or create your own, and reorder them.
+- At least one option must stay on. Students only ever see enabled options (checked again at the moment of paying).
+- Per-option booking count, money collected and cash still due. Removing an option never breaks old bookings (they keep their label).
+- Cash-specific wording (login screen, privacy note) hides itself when Cash is off.
+
+**4. Stop tracking is no longer one-way**
+- *Stop tracking* now **pauses**. A green **Resume live tracking** banner stays on Home while the ride is still running, and tapping your vehicle on the map also resumes. **I have got off, end this ride** ends it for good, and it ends automatically once the vehicle is back at the hub.
+
+**Extras**
+- **Student demo login**: username `demo`, password `123` on the Student tab signs in as *Demo Student* with a sample timetable and no LMS needed (handy for marking/demos). Driver/Admin use the same demo/123.
+- Existing saved browser data is migrated automatically; nothing needs to be reset.
