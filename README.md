@@ -91,3 +91,25 @@ After deploying, **sign out and sign in again** so the app re-pulls the timetabl
 **Extras**
 - **Student demo login**: username `demo`, password `123` on the Student tab signs in as *Demo Student* with a sample timetable and no LMS needed (handy for marking/demos). Driver/Admin use the same demo/123.
 - Existing saved browser data is migrated automatically; nothing needs to be reset.
+
+---
+
+## KLUST Plus (presentation build) - `plus.js`
+
+Loaded at the bottom of `index.html`; everything below lives in `plus.js` (plus an app-shell cache in `sw.js`).
+
+| # | Feature | Where |
+|---|---|---|
+| 1 | **My location** button under +, -, centre on every map. Boarded riders: your dot becomes the vehicle | map controls |
+| 2 | Driver **Share live location** prompt after choosing a vehicle (and a switch in the ride view). Off = personal location never tracked; the bus then shows its scheduled position | driver |
+| 3 | **Take another road** redraws the route (orange dashed), adds a delay incident and updates every ETA; **Report delay** for traffic etc. | driver ride view |
+| 4 | **Pass** tab: apply weekly/monthly, get a QR, driver verifies it (also typed `PASS-XXXXXX`). Admin **Desk**: approve/reject, +7 days, revoke, edit fares | student, admin |
+| 5 | **Help** tab: cleanliness, driver/stop feedback, lost and found. Admin Desk: re-categorise, assign, resolve | student, admin |
+| 6 | English, Bahasa Malaysia, Bangla (Demo tools menu) | all |
+| 7 | Offline banner, stale-data warning, queued changes sync on reconnect; tickets, passes and passenger lists work from saved data | all |
+| 8 | If location fails: "Can't find your location" + **Select location manually** | map |
+| 9 | Driver **Start ride**: full-screen live map like the student view | driver |
+| 10 | After location: walking route + minutes + next bus at the nearest stop | map |
+| 11 | **Demo tools -> Simulation**: random boardings, delays, detours, reports, pass applications | all |
+
+Notes: the walking route uses the public OSRM demo server (falls back to a straight line). Data is stored in the browser (localStorage), so open student, driver and admin in separate windows of the same browser to watch them react to each other.
