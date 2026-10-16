@@ -98,15 +98,19 @@ After deploying, **sign out and sign in again** so the app re-pulls the timetabl
 
 Loaded at the bottom of `index.html`; everything below lives in `plus.js` (plus an app-shell cache in `sw.js`).
 
-| # | Feature | Where |
-|---|---|---|
-| 1 | **My location** button on maps. If a location lookup fails, choose **Select location manually** and drag the map pin to set the exact point. | map controls |
-| 2 | Driver **Trip** keeps the same embedded tracking map style as students. **Start ride** enables GPS sharing; **Ride details** shows the next stop, ETA, passenger count and stop list. | driver |
-| 3 | GPS off-route detection logs a **route-deviation incident** and requests a real road-following driving route to the next stop. It is not a user-selectable alternate route; failed route lookup still records the incident and keeps GPS tracking active. | driver Trip |
-| 4 | **Pass** tab: apply weekly/monthly, get a QR, upload or replace a payment receipt, and view the saved receipt. Drivers verify passes; Admin Desk can review receipts, approve/reject, extend or revoke passes and edit fares. | student, driver, admin |
-| 5 | **Help** tab: cleanliness, driver/stop feedback, lost and found, with an optional photo attached. Admin Desk can view the photo, re-categorise, assign and resolve a report. | student, admin |
-| 6 | English, Bahasa Malaysia and Bangla can be changed from **Account** after login. The signin page has a compact language selector in the top-right corner. | all |
-| 7 | Offline banner, stale-data warning and queued changes on reconnect; tickets, passes and passenger lists use saved data while offline. | all |
-| 8 | **Admin → Account → Demo settings** controls demo mode and simulation. The sample feed is admin-only and creates no fake boardings, pass applications, issues or incidents for students/drivers. | admin |
+| Feature | Where |
+|---|---|
+| **My location** button under +, -, centre on every map. Boarded riders: your dot becomes the vehicle | map controls |
+| If location fails: card at the top with **Select location manually** -> drag the map under a fixed pin, Confirm | map |
+| After location: walking route, minutes, distance and next bus at the nearest stop | map |
+| **Driver** tab Trip = map like the student one. **Start ride** + ride details (next stop, ETA, passengers, status, share live location, report delay, End ride) | driver |
+| Share live location prompt after the driver picks a vehicle. Off = personal location never tracked; the bus then shows its scheduled position | driver |
+| **Automatic re-route** (like a navigation app): a vehicle that leaves its route gets a new road route to the next stop (orange line), and ETAs move. Real GPS: 3 fixes more than 80 m off route. Driver can add a delay incident | map, driver |
+| **Pass** tab: apply weekly/monthly, optional receipt upload, QR; driver verifies QR or typed `PASS-XXXXXX` | student, driver |
+| **Help** tab: cleanliness, driver/stop feedback, lost and found, with photo upload | student |
+| **Desk** tab (admin): approve/reject passes, +7 days, revoke, fares, view receipts; categorise, assign, resolve reports, view photos | admin |
+| English, Melayu, Bangla: top-right on the sign-in page and in Account for every role | all |
+| Offline banner, stale-data warning, queued changes sync on reconnect | all |
+| **Account (admin) -> Demo mode**: Simulation on/off, Offline mode, send a bus on another road, event feed. Students and drivers never see the feed | admin |
 
-Notes: walking and driving route geometry use the public OSRM demo service when available (walking falls back to a straight line if routing is unavailable). Photo attachments are compressed in the browser and stored with local app data. Data is stored in the browser (localStorage), so open student, driver and admin in separate windows of the same browser to watch their saved state react to one another.
+Notes: routes use the public OSRM demo server (walking and driving). Data lives in the browser (localStorage), so open student, driver and admin in separate windows of the same browser to watch them react to each other.

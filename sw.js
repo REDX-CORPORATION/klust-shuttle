@@ -7,7 +7,7 @@
 
 const CACHE_NAME = 'klust-tiles-v1';
 const TILE_HOSTS = ['tile.openstreetmap.org', 'tile.osmit.it'];
-const SHELL = 'klust-shell-v2'; // app shell for offline use
+const SHELL = 'klust-shell-v1'; // app shell for offline use
 const MAX_ENTRIES = 1600; // ~a few MB of tiles; oldest are evicted first
 
 self.addEventListener('install', () => { self.skipWaiting(); });
