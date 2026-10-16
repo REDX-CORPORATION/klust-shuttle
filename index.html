@@ -736,7 +736,7 @@ function seed() {
   const R = (id, name, color, stops, days, first, last, fare, weight) => ({ id, name, color, stops, legs: estLegs(stops), days, first, last, fare, weight, archived: false });
   const d = {
     v: 2, net: NET,
-    settings: { ignoreHours: true, ignoreDays: false },
+    settings: { ignoreHours: false, ignoreDays: false },
     routes: [
       R('R1', 'KTM Serdang & MRT Serdang Jaya', '#2459D6', ['B9', 'AGRI', 'KTMS', 'MRTSJ'], 'wk', '07:00', '20:30', 2, 1.0),
       R('R2', 'IOI City Mall & KTM Serdang', '#8B3FD1', ['B9', 'DCMALL', 'IOI', 'KTMS'], 'we', '07:30', '20:30', 3, .8),
@@ -1945,33 +1945,47 @@ SCREENS.account = el => {
   const paint = () => {
     const th = Theme.get();
     const appearanceRow = `<div class="lrow static"><span class="lrow-ico">${icon('sun')}</span><span class="grow"><b>Appearance</b></span><div class="seg sm">${[['system', 'Auto'], ['light', 'Light'], ['dark', 'Dark']].map(([k, l]) => `<button data-th="${k}" aria-pressed="${th === k}">${l}</button>`).join('')}</div></div>`;
+    const currentLang = window.KLUSTGetLanguage ? window.KLUSTGetLanguage() : 'en';
+    const languageRow = `<div class="lrow static"><span class="lrow-ico">${icon('globe')}</span><label class="grow"><b>Language</b><small>Change the app language at any time.</small></label><select class="input sm" data-lang aria-label="Language">${[['en','English'],['ms','Bahasa Malaysia'],['bn','বাংলা']].map(([k,l]) => `<option value="${k}" ${currentLang === k ? 'selected' : ''}>${l}</option>`).join('')}</select></div>`;
     let idBlock, rows, extra = '';
     if (role === 'student') {
       const u = Store.d.users[App.s.id];
       idBlock = `<div class="idcard"><div class="id-top">${u.photo ? `<img src="${u.photo}" alt="" style="width:40px;height:40px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 2px var(--surface)">` : logo()}<span class="chip-s ok">${icon('shield')}Eligible to ride</span></div><h2>${esc(u.name)}</h2><p class="num">${esc(App.s.id)}</p><p class="small">${esc(u.program)}</p></div>`;
       rows = `<button class="lrow" data-act="stop"><span class="lrow-ico">${icon('pin')}</span><span class="grow"><b>My stop</b><small>${esc(STOPS[Student.stop()].name)}</small></span>${icon('right')}</button>
         ${u.timetable && u.timetable.length ? `<button class="lrow" data-act="timetable"><span class="lrow-ico">${icon('cal')}</span><span class="grow"><b>My timetable</b><small>${u.timetable.length} classes this week, from LMS</small></span>${icon('right')}</button>` : ''}
-        ${appearanceRow}`;
+        ${appearanceRow}
+        ${languageRow}`;
       extra = `<section class="card"><h3 style="margin-bottom:10px">Your privacy</h3><ul class="plist"><li>${icon('eyeoff')}<span>We track shuttles, not phones. Your location is only read when you tap Use my location, to find the closest stop. It stays on your device and is never saved or sent.</span></li><li>${icon('shield')}<span>When a driver checks your ticket or student ID, they only see whether you can ride. Your records stay private.</span></li>${payOn('cash') ? `<li>${icon('cash')}<span>No phone or data? Show your student ID and pay cash on board on any route.</span></li>` : ''}</ul></section>`;
     } else if (role === 'driver') {
       const d = Driver.me(), v = Driver.veh(), r = v && routeById(v.route);
       idBlock = `<div class="idcard"><div class="id-top">${logo()}<span class="chip-s ${v ? 'ok' : ''}">${icon('bus')}${v ? 'On shift' : 'No vehicle'}</span></div><h2>${esc(d ? d.name : 'Driver')}</h2><p class="num">${esc(App.s.id)}</p><p class="small">${v ? `${esc(v.id)}, ${esc(v.plate)}${r ? `, Route ${r.id.slice(1)}` : ''}` : 'No vehicle selected'}</p></div>`;
       rows = `<button class="lrow" data-act="vehicle"><span class="lrow-ico">${icon('bus')}</span><span class="grow"><b>My vehicle</b><small>${v ? `${esc(v.id)}${r ? `, Route ${r.id.slice(1)}` : ', No route'}` : 'Choose a vehicle'}</small></span>${icon('right')}</button>
-        ${appearanceRow}`;
+        ${appearanceRow}
+        ${languageRow}`;
     } else {
       idBlock = `<div class="idcard"><div class="id-top">${logo()}<span class="chip-s ok">${icon('shield')}Operations</span></div><h2>Demo Admin</h2><p class="num">${esc(App.s.id)}</p><p class="small">Fleet operations</p></div>`;
-      rows = appearanceRow;
+      rows = `${appearanceRow}${languageRow}`;
+      const demo = window.KLUSTDemoState ? window.KLUSTDemoState() : { demo: false, sim: false, off: false, ignoreHours: false, ignoreDays: false };
+      extra = `<section class="card"><h3 style="margin-bottom:4px">Demo settings</h3><p class="small muted" style="margin:0 0 10px">Control presentation-only activity here. Students and drivers will not see the demo activity feed.</p>
+        <div class="lrow static"><span class="grow"><b>Demo mode</b><small>Enable simulation and demo-only settings.</small></span><button class="switch" role="switch" data-demo="mode" aria-checked="${demo.demo}" aria-label="Demo mode"><i></i></button></div>
+        ${demo.demo ? `<div class="lrow static"><span class="grow"><b>Simulation</b><small>Generate sample operational activity for admin review.</small></span><button class="switch" role="switch" data-demo="sim" aria-checked="${demo.sim}" aria-label="Simulation"><i></i></button></div>
+        <div class="lrow static"><span class="grow"><b>Run at any hour</b><small>Show vehicles outside timetable hours.</small></span><button class="switch" role="switch" data-demo="ignoreHours" aria-checked="${demo.ignoreHours}" aria-label="Run at any hour"><i></i></button></div>
+        <div class="lrow static"><span class="grow"><b>Run on any day</b><small>Show weekday and weekend routes today.</small></span><button class="switch" role="switch" data-demo="ignoreDays" aria-checked="${demo.ignoreDays}" aria-label="Run on any day"><i></i></button></div>
+        <div class="lrow static"><span class="grow"><b>Offline preview</b><small>Preview the saved-data offline banner.</small></span><button class="switch" role="switch" data-demo="offline" aria-checked="${demo.off}" aria-label="Offline preview"><i></i></button></div>` : ''}
+        ${demo.demo && demo.feed && demo.feed.length ? `<div style="margin-top:12px"><h4 class="grp">Recent demo activity</h4>${demo.feed.map(x => `<p class="small muted" style="margin:5px 0">${esc(x)}</p>`).join('')}</div>` : ''}
+      </section>`;
     }
     el.innerHTML = header('Account', '', bellBtn()) + `<div class="content narrow stack-l">
       ${idBlock}
       <div class="list card-list">${rows}</div>
       ${extra}
       <button class="btn ghost block" data-act="signout">${icon('logout')}Sign out</button>
-      <button class="linkbtn subtle center" data-act="reset">Reset demo data</button>
+      ${role === 'admin' ? '<button class="linkbtn subtle center" data-act="reset">Reset demo data</button>' : ''}
       ${creditsHtml()}</div>`;
   };
   paint();
-  el.onclick = e => { const t = e.target.closest('button'); if (!t) return; if (t.dataset.th) { Theme.set(t.dataset.th); paint(); } if (t.dataset.act === 'stop') Student.pickStop(() => paint()); if (t.dataset.act === 'timetable') timetableDialog(); if (t.dataset.act === 'vehicle') pickVehicleDialog(() => paint()); if (t.dataset.act === 'signout') App.signOut(); if (t.dataset.act === 'reset') resetDemo(); };
+  el.onchange = e => { const t = e.target; if (t.dataset.lang && window.KLUSTSetLanguage) { window.KLUSTSetLanguage(t.value); paint(); } };
+  el.onclick = e => { const t = e.target.closest('button'); if (!t) return; if (t.dataset.th) { Theme.set(t.dataset.th); paint(); } if (t.dataset.demo && window.KLUSTSetDemoSetting) { window.KLUSTSetDemoSetting(t.dataset.demo); paint(); } if (t.dataset.act === 'stop') Student.pickStop(() => paint()); if (t.dataset.act === 'timetable') timetableDialog(); if (t.dataset.act === 'vehicle') pickVehicleDialog(() => paint()); if (t.dataset.act === 'signout') App.signOut(); if (t.dataset.act === 'reset') resetDemo(); };
   return { onStore() { if (!$('.scrim')) paint(); } };
 };
 function pickVehicleDialog(onDone) {
@@ -2321,10 +2335,7 @@ SCREENS.fleet = el => {
         <td><select class="input sm" data-route="${v.id}" aria-label="Route for ${v.id}"><option value="">Not assigned</option>${liveRoutes().map(r => `<option value="${r.id}" ${v.route === r.id ? 'selected' : ''}>Route ${r.id.slice(1)}, ${esc(r.name)}</option>`).join('')}</select></td>
         <td>${esc(d ? d.name : 'None')}<small class="block muted">${d ? (d.onShift ? 'On shift' : 'Off shift') : ''}</small></td>
         <td><select class="input sm" data-status="${v.id}" aria-label="Status for ${v.id}">${[['service', 'In service'], ['full', 'Full'], ['standby', 'Standby'], ['maintenance', 'Maintenance'], ['out', 'Out of service']].map(([k, l]) => `<option value="${k}" ${v.status === k ? 'selected' : ''}>${l}</option>`).join('')}</select></td>
-        <td><span class="chip-s ${s.cls}">${esc(s.text)}</span>${vis ? `<small class="block muted">${onboard(v)} of ${v.cap} on board</small>` : ''}</td></tr>`; }).join('')}</tbody></table></div>
-      <section class="card" style="margin-top:16px"><h3>Demo settings</h3><p class="small muted" style="margin:4px 0 10px">These make the live map useful outside real service times.</p>
-        <div class="lrow static"><span class="grow"><b>Run at any hour</b><small>Vehicles keep moving outside timetable hours.</small></span><button class="switch" role="switch" aria-checked="${st.ignoreHours}" data-set="ignoreHours" aria-label="Run at any hour"><i></i></button></div>
-        <div class="lrow static"><span class="grow"><b>Run on any day</b><small>Weekday and weekend routes all appear today.</small></span><button class="switch" role="switch" aria-checked="${st.ignoreDays}" data-set="ignoreDays" aria-label="Run on any day"><i></i></button></div></section></div>`;
+        <td><span class="chip-s ${s.cls}">${esc(s.text)}</span>${vis ? `<small class="block muted">${onboard(v)} of ${v.cap} on board</small>` : ''}</td></tr>`; }).join('')}</tbody></table></div></div>`;
   };
   paint();
   el.onchange = e => { const t = e.target;

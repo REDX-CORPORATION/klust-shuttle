@@ -100,16 +100,13 @@ Loaded at the bottom of `index.html`; everything below lives in `plus.js` (plus 
 
 | # | Feature | Where |
 |---|---|---|
-| 1 | **My location** button under +, -, centre on every map. Boarded riders: your dot becomes the vehicle | map controls |
-| 2 | Driver **Share live location** prompt after choosing a vehicle (and a switch in the ride view). Off = personal location never tracked; the bus then shows its scheduled position | driver |
-| 3 | **Take another road** redraws the route (orange dashed), adds a delay incident and updates every ETA; **Report delay** for traffic etc. | driver ride view |
-| 4 | **Pass** tab: apply weekly/monthly, get a QR, driver verifies it (also typed `PASS-XXXXXX`). Admin **Desk**: approve/reject, +7 days, revoke, edit fares | student, admin |
-| 5 | **Help** tab: cleanliness, driver/stop feedback, lost and found. Admin Desk: re-categorise, assign, resolve | student, admin |
-| 6 | English, Bahasa Malaysia, Bangla (Demo tools menu) | all |
-| 7 | Offline banner, stale-data warning, queued changes sync on reconnect; tickets, passes and passenger lists work from saved data | all |
-| 8 | If location fails: "Can't find your location" + **Select location manually** | map |
-| 9 | Driver **Start ride**: full-screen live map like the student view | driver |
-| 10 | After location: walking route + minutes + next bus at the nearest stop | map |
-| 11 | **Demo tools -> Simulation**: random boardings, delays, detours, reports, pass applications | all |
+| 1 | **My location** button on maps. If a location lookup fails, choose **Select location manually** and drag the map pin to set the exact point. | map controls |
+| 2 | Driver **Trip** keeps the same embedded tracking map style as students. **Start ride** enables GPS sharing; **Ride details** shows the next stop, ETA, passenger count and stop list. | driver |
+| 3 | GPS off-route detection logs a **route-deviation incident** and requests a real road-following driving route to the next stop. It is not a user-selectable alternate route; failed route lookup still records the incident and keeps GPS tracking active. | driver Trip |
+| 4 | **Pass** tab: apply weekly/monthly, get a QR, upload or replace a payment receipt, and view the saved receipt. Drivers verify passes; Admin Desk can review receipts, approve/reject, extend or revoke passes and edit fares. | student, driver, admin |
+| 5 | **Help** tab: cleanliness, driver/stop feedback, lost and found, with an optional photo attached. Admin Desk can view the photo, re-categorise, assign and resolve a report. | student, admin |
+| 6 | English, Bahasa Malaysia and Bangla can be changed from **Account** after login. The signin page has a compact language selector in the top-right corner. | all |
+| 7 | Offline banner, stale-data warning and queued changes on reconnect; tickets, passes and passenger lists use saved data while offline. | all |
+| 8 | **Admin → Account → Demo settings** controls demo mode and simulation. The sample feed is admin-only and creates no fake boardings, pass applications, issues or incidents for students/drivers. | admin |
 
-Notes: the walking route uses the public OSRM demo server (falls back to a straight line). Data is stored in the browser (localStorage), so open student, driver and admin in separate windows of the same browser to watch them react to each other.
+Notes: walking and driving route geometry use the public OSRM demo service when available (walking falls back to a straight line if routing is unavailable). Photo attachments are compressed in the browser and stored with local app data. Data is stored in the browser (localStorage), so open student, driver and admin in separate windows of the same browser to watch their saved state react to one another.
