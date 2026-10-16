@@ -122,11 +122,11 @@ function ui(m) {
 { const tk = SM.tick; SM.tick = function (n) { tk.call(this, n); if (this._ride && this.um) { const v = vehicleById(this._ride), s = v && vState(v); if (s && s.visible) { const p = vPos(s); this.um.lat = p.lat; this.um.lng = p.lng; } } }; }
 async function useLoc(m, p) {
   m._ride = null; m.setUser(p); const [n] = Locate.rank(p, served()), s = STOPS[n.id];
-  let ll = [[p.lat, p.lng], [s.lat, s.lng]], min = Math.max(1, Math.round(n.km * 16.25)), km = n.km * 1.3;
-  try { const c = new AbortController(); setTimeout(() => c.abort(), 4000); const j = await (await fetch(`https://router.project-osrm.org/route/v1/foot/${p.lng},${p.lat};${s.lng},${s.lat}?overview=full&geometries=geojson`, { signal: c.signal })).json(), R = j.routes[0]; ll = R.geometry.coordinates.map(c => [c[1], c[0]]); min = Math.max(1, Math.round(R.duration / 60)); km = R.distance / 1000; } catch (e) { }
+  let ll = [[p.lat, p.lng], [s.lat, s.lng]], min = Math.max(1, Math.round(n.km * 1.3 * 12)), km = n.km * 1.3;
+  try { const c = new AbortController(); setTimeout(() => c.abort(), 4000); const j = await (await fetch(`https://router.project-osrm.org/route/v1/foot/${p.lng},${p.lat};${s.lng},${s.lat}?overview=full&geometries=geojson`, { signal: c.signal })).json(), R = j.routes[0]; ll = R.geometry.coordinates.map(c => [c[1], c[0]]); km = R.distance / 1000; min = Math.max(1, Math.round(km * 12)); } catch (e) { }
   m._walk = { ll }; over(m);
-  const bus = Math.min(...Store.d.vehicles.map(v => etaFor(v, n.id)).filter(x => x != null && isFinite(x)));
-  chip(m, `<b>Nearest stop: ${esc(s.short || s.name)}</b><span>${n.km < .06 ? 'You are at this stop' : `${min} min walk, ${Locate.dist(km)}`}${p.manual ? ', location set manually' : ''}${isFinite(bus) ? `, next bus ${etaText(bus)}` : ''}</span>`);
+  const etas = Store.d.vehicles.map(v => etaFor(v, n.id)).filter(x => x != null && isFinite(x)), walk = n.km < .06 ? 0 : min, ok = etas.filter(x => x >= walk - 1), bus = ok.length ? Math.min(...ok) : Math.min(...etas);
+  chip(m, `<b>Nearest stop: ${esc(s.short || s.name)}</b><span>${n.km < .06 ? 'You are at this stop' : `${min} min walk, ${Locate.dist(km)}`}${p.manual ? ', location set manually' : ''}${isFinite(bus) ? (ok.length ? `, next bus you can catch: ${etaText(bus)}` : `, next bus ${etaText(bus)}, you may miss it`) : ''}</span>`);
   m.map.user = true; if (n.km >= .06) m.map.fitBounds(ll, {}, true); else m.setStop(n.id, true);
 }
 { const g = Locate.get.bind(Locate); Locate.get = () => g().then(p => { MAPS.forEach(m => m.box.isConnected && useLoc(m, p)); return p; }); }
